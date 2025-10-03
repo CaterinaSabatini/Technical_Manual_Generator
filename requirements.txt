@@ -1,0 +1,4 @@
+Flask==2.3.3
+reportlab==4.0.5
+yt-dlp==2023.9.24
+python-dotenv==1.0.1

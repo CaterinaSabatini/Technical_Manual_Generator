@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechGuide - Technical Manual Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <button id="homeBtn" class="home-btn hidden">Home</button>
+                <h1 class="logo">TechGuide</h1>
+                <p class="subtitle">Technical Manual Generator</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Search Section -->
+            <section id="searchSection" class="search-section">
+                <div class="search-container">
+                    <h2>Search for Device Manual</h2>
+                    <p class="search-note">Please enter the device name correctly! </p>
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="deviceInput" 
+                            class="device-input" 
+                            placeholder="Enter device name"
+                            autocomplete="off"
+                        >
+                        <button id="searchBtn" class="search-btn">
+                            <span class="btn-text">Search</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading Section -->
+            <section id="loadingSection" class="loading-section hidden">
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Searching for manual...</p>
+                </div>
+            </section>
+
+            <!-- Results -->
+            <section id="resultsSection" class="results-section hidden">
+                <div class="manual-container" id="manualContainer">
+                </div>
+                <div class="action-buttons">
+                    <button id="downloadBtn" class="download-btn">
+                        Download PDF Manual
+                    </button>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section id="errorSection" class="error-section hidden">
+                <div class="error-container">
+                    <h3>Manual Not Found</h3>
+                    <p id="errorMessage">An error occurred while searching for the manual.</p>
+                    <div class="error-actions">
+                        <button id="retryBtn" class="retry-btn">Retry</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
