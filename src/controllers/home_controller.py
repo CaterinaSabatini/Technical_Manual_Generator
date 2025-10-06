@@ -3,10 +3,13 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.enums import TA_CENTER
+from yt_dlp import YoutubeDL
+import re
 import io
 import datetime
 import os
 import json
+import tempfile
 
 
 # Device data loader functions
@@ -257,4 +260,35 @@ def download_pdf_api():
     except Exception as e:
         print(f"Error in download_pdf_api: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+def get_sottotitoli(ricerca):
+
+    dd = tempfile.TemporaryDirectory()
+    tempdir = dd.name
+    downloader = YoutubeDL({"skip_download": True,
+                            "writeautomaticsub": True,
+                            "outtmpl": {
+                                "subtitle": f"{tempdir}/%(id)s"
+                                }
+                            })
+
+    data = downloader.extract_info(f"ytsearch1:{ricerca}")
+
+    with open(f"{tempdir}/data.json", "w") as f:
+        json.dump(data, f)
+    with open(f"{tempdir}/{data['entries'][0]['id']}.en.vtt", 'r') as f:
+        sottotitoli = f.readlines()
+
+    sottotitoli = sottotitoli[3:]
+    sottotitoli = [r for r in sottotitoli if not re.match("^\\s*\n", r)]
+    sottotitoli = [r for r in sottotitoli if not re.match("^[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3} --> [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}", r)]
+    sottotitoli = [re.sub("<[^>]*>","",r) for r in sottotitoli]
+    prev = ''
+    puliti = []
+
+    for r in sottotitoli:
+        if r != prev:
+            puliti.append(r)
+            prev = r
+    return ''.join(puliti)
 
