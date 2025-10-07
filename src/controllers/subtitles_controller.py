@@ -1,0 +1,120 @@
+from yt_dlp import YoutubeDL
+import os
+import json
+import re
+import tempfile
+
+
+#Keywords to be reviewed taking into account the sources found on Internet
+KEYWORDS = [
+    "teardown", "disassembly", "repair", "fix", "remove",
+    "replace", "replacement", "unscrew","removal", "step by step"
+]
+
+#Maximum number of videos to analyze
+MAX_VIDEOS = 10
+
+#Validation parameters for video selection
+MIN_VIEWS = 10000
+MIN_DURATION = 60 # seconds
+MAX_DURATION = 3600 # 1h 
+MIN_LIKE_RATIO = 0.7 # min 70% likes vs total votes
+
+"""
+Check if the video info contains any of the specified keywords in title or description
+"""
+def contains_keywords(info):
+    combined_text= (info.get('title', '') + " " + info.get('description', '')).lower()
+    return any(k.lower() in combined_text for k in KEYWORDS)
+
+"""
+Check if the video meets all the criteria for selection
+"""
+def is_valid_video(entry):
+    views = entry.get('view_count', 0)
+    duration = entry.get('duration', 0)
+    like_count = entry.get('like_count', 0)
+    dislike_count = entry.get('dislike_count', 0)
+    total_votes = like_count + dislike_count
+    ratio_votes = like_count / total_votes if total_votes > 0 else 1
+
+    return (
+        views >= MIN_VIEWS and
+        MIN_DURATION <= duration <= MAX_DURATION and
+        ratio_votes >= MIN_LIKE_RATIO
+    )
+
+"""
+Get subtitles from YouTube videos based on a search query
+"""
+
+def get_sottotitoli(ricerca):
+
+    with tempfile.TemporaryDirectory() as tempdir:
+
+        downloader = YoutubeDL({
+            "skip_download": True,
+            "writesubtitles": True,
+            "writeautomaticsub": True,
+            #"subtitleslangs": ["en"], # English subtitles for more accuracy
+            "outtmpl": f"{tempdir}/%(id)s",                      
+        })
+
+        print(f"ytsearch{MAX_VIDEOS}:{ricerca}")
+
+        data = downloader.extract_info(f"ytsearch{MAX_VIDEOS}:{ricerca}")
+
+        with open(os.path.join(tempdir, "data.json"), "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        valid_videos = []
+        
+        for entry in data.get('entries', []):
+            if not entry or not is_valid_video(entry):
+                continue
+            video_id = entry["id"]
+            url = entry["webpage_url"]
+            channel = entry.get("uploader") or entry.get("channel") or "Unknown"
+            title = entry.get("title", "")
+            duration = entry.get("duration", 0)
+            views = entry.get("view_count", 0)
+
+            vtt_path = os.path.join(tempdir, f"{video_id}.en.vtt")
+
+            try:
+                downloader.download([url])
+                with open(vtt_path, 'r', encoding='utf-8') as f:
+                    sottotitoli = f.readlines()
+            except FileNotFoundError:
+                continue
+            
+            sottotitoli = sottotitoli[3:]
+            sottotitoli = [r for r in sottotitoli if not re.match("^\\s*\n", r)]
+            sottotitoli = [r for r in sottotitoli if not re.match("^[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3} --> [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}", r)]
+            sottotitoli = [re.sub("<[^>]*>","",r) for r in sottotitoli]
+            prev = ''
+            puliti = []
+
+            for r in sottotitoli:
+                if r != prev:
+                    puliti.append(r)
+                    prev = r
+            results = ''.join(puliti)
+
+            valid_videos.append({
+                "video_id": video_id,
+                "url": url,
+                "channel": channel,
+                "title": title,
+                "duration": duration,
+                "views": views,
+                "subtitles": results,
+                "copyright_note": f"'{title}' by {channel} on YouTube."
+            })
+            
+        output_dir = "subtitles"
+        os.makedirs(output_dir, exist_ok=True)
+
+        output_path = os.path.join(output_dir, f"{ricerca.replace(' ', '_')}_subtitles.json")
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(valid_videos, f, ensure_ascii=False, indent=2)

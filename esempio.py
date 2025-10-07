@@ -3,8 +3,24 @@ import json
 import re
 import tempfile
 
-dd = tempfile.TemporaryDirectory()
+#Keywords to be reviewed taking into account the sources found on Internet
+KEYWORDS = [
+    "teardown", "disassembly", "repair", "ifixit", "remove battery",
+    "replace screen", "unscrew", "upgrade ram", "ssd removal",
+    "keyboard removal", "motherboard", "step by step"
+]
 
+#Validation parameters for video selection
+
+MIN_VIEWS = 10000
+MIN_DURATION = 60 # seconds
+MAX_DURATION = 3600 # 1h
+MIN_LIKE_RATIO = 0.7 # min 70% likes vs total votes
+
+#Create a temporary directory to store downloaded subtitles
+dd = tempfile.TemporaryDirectory() 
+
+#Path to the temporary directory
 tempdir = dd.name
 
 downloader = YoutubeDL({"skip_download": True,
