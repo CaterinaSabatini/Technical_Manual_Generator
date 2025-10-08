@@ -3,6 +3,8 @@ import os
 import json
 import re
 import tempfile
+import datetime
+from controllers import fotogrammi_controller as fotogrammi
 
 
 #Keywords to be reviewed taking into account the sources found on Internet
@@ -12,7 +14,7 @@ KEYWORDS = [
 ]
 
 #Maximum number of videos to analyze
-MAX_VIDEOS = 10
+MAX_VIDEOS = 3
 
 #Validation parameters for video selection
 MIN_VIEWS = 10000
@@ -53,11 +55,15 @@ def get_sottotitoli(ricerca):
     with tempfile.TemporaryDirectory() as tempdir:
 
         downloader = YoutubeDL({
-            "skip_download": True,
+            "skip_download": False,
+            "format": 'sb0',
             "writesubtitles": True,
             "writeautomaticsub": True,
             #"subtitleslangs": ["en"], # English subtitles for more accuracy
-            "outtmpl": f"{tempdir}/%(id)s",                      
+            "outtmpl":{
+                'subtitle': f"{tempdir}/%(id)s",
+                'default': f"{tempdir}/%(id)s.mhtml"
+                }
         })
 
         print(f"ytsearch{MAX_VIDEOS}:{ricerca}")
@@ -68,6 +74,9 @@ def get_sottotitoli(ricerca):
             json.dump(data, f, ensure_ascii=False, indent=2)
 
         valid_videos = []
+        output_foto = "fotogrammi"
+        os.makedirs(output_foto, exist_ok=True)
+
         
         for entry in data.get('entries', []):
             if not entry or not is_valid_video(entry):
@@ -90,16 +99,51 @@ def get_sottotitoli(ricerca):
             
             sottotitoli = sottotitoli[3:]
             sottotitoli = [r for r in sottotitoli if not re.match("^\\s*\n", r)]
-            sottotitoli = [r for r in sottotitoli if not re.match("^[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3} --> [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}", r)]
+#            sottotitoli = [r for r in sottotitoli if not re.match("^[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3} --> [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}", r)]
             sottotitoli = [re.sub("<[^>]*>","",r) for r in sottotitoli]
-            prev = ''
-            puliti = []
 
+            completi = []
+            prev = ''
+            time = None
             for r in sottotitoli:
                 if r != prev:
-                    puliti.append(r)
-                    prev = r
-            results = ''.join(puliti)
+                    if mm := re.match("^([0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}) --> ([0-9]{2}):([0-9]{2}):([0-9]{2}).([0-9]{3})", r):
+                        time = datetime.datetime.strptime(mm.group(1) + '000', '%H:%M:%S.%f')
+                    else:
+                        completi.append({
+                            'tempo': time,
+                            'testo': r
+                            })
+                        prev = r
+
+            output_path = os.path.join(output_foto, video_id)
+            os.mkdir(output_path)
+            
+            file_immagini = open(f"{tempdir}/{video_id}.mhtml", 'rb')
+            w = 0
+            h = 0
+            for ff in entry['formats']:
+                if ff['format_id'] == "sb0":
+                    w = ff['width']
+                    h = ff['height']
+            immagini = fotogrammi.estrai_fotogrammi(file_immagini)
+            frames = []
+            for t,img in immagini:
+                frames += fotogrammi.taglia_fotogramma(img, w, h, t['inizio'], t['fine'])
+
+            results = []
+            ccc = 0
+            while len(completi)>0 or len(frames)>0:
+                if len(completi)>0 and (len(frames)==0 or completi[0]['tempo'] < frames[0][0]):
+                    results.append({'tipo':'testo', 'dati': completi[0]['testo']})
+                    completi = completi[1:]
+                else:
+                    datt = frames[0][1]
+                    impath = os.path.join(output_path, f"{ccc:03d}.png")
+                    results.append({'tipo': 'immagine', 'dati': impath})
+                    datt.save(impath,"PNG")
+                    ccc+=1
+                    frames = frames[1:]
 
             valid_videos.append({
                 "video_id": video_id,
