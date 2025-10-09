@@ -35,8 +35,11 @@ Check if the video meets all the criteria for selection
 def is_valid_video(entry):
     views = entry.get('view_count', 0)
     duration = entry.get('duration', 0)
-    like_count = entry.get('like_count', 0)
-    dislike_count = entry.get('dislike_count', 0)
+
+    if (like_count := entry.get('like_count')) is None:
+        like_count = 0
+    if (dislike_count := entry.get('dislike_count')) is None:
+        dislike_count = 0
     total_votes = like_count + dislike_count
     ratio_votes = like_count / total_votes if total_votes > 0 else 1
 
@@ -72,6 +75,7 @@ def get_sottotitoli(ricerca):
 
         with open(os.path.join(tempdir, "data.json"), "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+        
 
         valid_videos = []
         output_foto = "fotogrammi"
@@ -91,7 +95,6 @@ def get_sottotitoli(ricerca):
             vtt_path = os.path.join(tempdir, f"{video_id}.en.vtt")
 
             try:
-                downloader.download([url])
                 with open(vtt_path, 'r', encoding='utf-8') as f:
                     sottotitoli = f.readlines()
             except FileNotFoundError:
@@ -102,6 +105,7 @@ def get_sottotitoli(ricerca):
 #            sottotitoli = [r for r in sottotitoli if not re.match("^[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3} --> [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}", r)]
             sottotitoli = [re.sub("<[^>]*>","",r) for r in sottotitoli]
 
+            
             completi = []
             prev = ''
             time = None
@@ -116,17 +120,25 @@ def get_sottotitoli(ricerca):
                             })
                         prev = r
 
-            output_path = os.path.join(output_foto, video_id)
-            os.mkdir(output_path)
             
+            output_path = os.path.join(output_foto, video_id)
+
+            try:
+                os.mkdir(output_path)
+            except FileExistsError:
+                for i in os.listdir(output_path):
+                    os.remove(os.path.join(output_path, i))
+
             file_immagini = open(f"{tempdir}/{video_id}.mhtml", 'rb')
+            dati_immagini = file_immagini.read()
+            file_immagini.close()
             w = 0
             h = 0
             for ff in entry['formats']:
                 if ff['format_id'] == "sb0":
                     w = ff['width']
                     h = ff['height']
-            immagini = fotogrammi.estrai_fotogrammi(file_immagini)
+            immagini = fotogrammi.estrai_fotogrammi(dati_immagini)
             frames = []
             for t,img in immagini:
                 frames += fotogrammi.taglia_fotogramma(img, w, h, t['inizio'], t['fine'])

@@ -12,20 +12,12 @@ def headers(data):
         row, rest = rest.split(b'\r\n',1)
     return (head, rest)
 
-def estrai_fotogrammi(file):
+def estrai_fotogrammi(dati):
+    header, rest = headers(dati)
+    bound = header[b"CONTENT-TYPE"].split(b'boundary="')[1].split(b'"')[0]
 
-    while (r := file.readline()) != b'\r\n':
-        if r.startswith(b"Content-type:"):
-            bound = r.split(b'boundary="')[1].split(b'"')[0]
-
-    sep = file.readline()
-    if sep != (b"--" + bound + b"\r\n"):
-        print("errore: separatore sbagliato")
-        exit(1)
-
-    content = file.read()
-
-    chunks = content.split(b"\r\n--" + bound + b"--\r\n")[0].split(b"\r\n--" + bound + b"\r\n")
+    rest = rest.split(b"\r\n",1)[1]
+    chunks = rest.split(b"\r\n--" + bound + b"--\r\n")[0].split(b"\r\n--" + bound + b"\r\n")
 
     limg = chunks[0]
     head, cont = headers(limg)
