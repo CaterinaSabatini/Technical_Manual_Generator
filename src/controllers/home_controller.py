@@ -1,5 +1,5 @@
 from flask import render_template, request, jsonify
-from .subtitles_controller import get_sottotitoli
+from .subtitles_controller import get_subtitles
 
 def home_controller():
     """Home page controller"""
@@ -12,6 +12,7 @@ def search_subtitles_api():
         if not data:
             return jsonify({
                 'success': False,
+                'status': 'error',
                 'error': 'No data provided in request'
             }), 400
         
@@ -20,13 +21,15 @@ def search_subtitles_api():
         if not device:
             return jsonify({
                 'success': False,
+                'status': 'error',
                 'error': 'Device name is required'
             }), 400
         
-        get_sottotitoli(device)
+        get_subtitles(device)
         
         return jsonify({
             'success': True,
+            'status': 'ok',
             'device': device,
             'message': f'Subtitle search completed for "{device}"',
         }), 200
@@ -34,5 +37,6 @@ def search_subtitles_api():
     except Exception as e:
         return jsonify({
             'success': False,
-            'error': f'Error during subtitle search: {str(e)}'
+            'status': 'error',
+            'error': f'{str(e)}'
         }), 500
