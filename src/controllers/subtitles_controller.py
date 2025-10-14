@@ -4,7 +4,7 @@ import json
 import re
 import tempfile
 import datetime
-from controllers import fotogrammi_controller as fotogrammi
+from .frames_controller import extract_frames, crop_frames
 
 
 #Keywords to be reviewed taking into account the sources found on Internet
@@ -24,6 +24,9 @@ MIN_LIKE_RATIO = 0.7 # min 70% likes vs total votes
 
 """
 Check if the video info contains any of the specified keywords in title or description
+
+@param info: dictionary containing video information
+@return: True if any keyword is found, False otherwise
 """
 def contains_keywords(info):
     combined_text= (info.get('title', '') + " " + info.get('description', '')).lower()
@@ -31,12 +34,18 @@ def contains_keywords(info):
 
 """
 Check if the video meets all the criteria for selection
+
+@param entry: dictionary containing video information
+@return: True if the video is valid, False otherwise
 """
 def is_valid_video(entry):
     views = entry.get('view_count', 0)
     duration = entry.get('duration', 0)
-    like_count = entry.get('like_count', 0)
-    dislike_count = entry.get('dislike_count', 0)
+
+    if (like_count := entry.get('like_count')) is None:
+        like_count = 0
+    if (dislike_count := entry.get('dislike_count')) is None:
+        dislike_count = 0
     total_votes = like_count + dislike_count
     ratio_votes = like_count / total_votes if total_votes > 0 else 1
 
@@ -47,10 +56,12 @@ def is_valid_video(entry):
     )
 
 """
-Get subtitles from YouTube videos based on a search query
-"""
+Get subtitles and frames from YouTube videos based on a search term
 
-def get_sottotitoli(ricerca):
+@param research: search term for finding relevant videos
+@return: None (results are saved to a JSON file)
+"""
+def get_subtitles(research):
 
     with tempfile.TemporaryDirectory() as tempdir:
 
@@ -59,22 +70,22 @@ def get_sottotitoli(ricerca):
             "format": 'sb0',
             "writesubtitles": True,
             "writeautomaticsub": True,
-            #"subtitleslangs": ["en"], # English subtitles for more accuracy
             "outtmpl":{
                 'subtitle': f"{tempdir}/%(id)s",
                 'default': f"{tempdir}/%(id)s.mhtml"
                 }
         })
 
-        print(f"ytsearch{MAX_VIDEOS}:{ricerca}")
-
-        data = downloader.extract_info(f"ytsearch{MAX_VIDEOS}:{ricerca}")
+        
+        data = downloader.extract_info(f"ytsearch{MAX_VIDEOS}:{research}")
 
         with open(os.path.join(tempdir, "data.json"), "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+        
 
         valid_videos = []
-        output_foto = "fotogrammi"
+
+        output_foto = "results/frames"
         os.makedirs(output_foto, exist_ok=True)
 
         
@@ -91,56 +102,62 @@ def get_sottotitoli(ricerca):
             vtt_path = os.path.join(tempdir, f"{video_id}.en.vtt")
 
             try:
-                downloader.download([url])
                 with open(vtt_path, 'r', encoding='utf-8') as f:
-                    sottotitoli = f.readlines()
+                    subtitles = f.readlines()
             except FileNotFoundError:
                 continue
-            
-            sottotitoli = sottotitoli[3:]
-            sottotitoli = [r for r in sottotitoli if not re.match("^\\s*\n", r)]
-#            sottotitoli = [r for r in sottotitoli if not re.match("^[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3} --> [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}", r)]
-            sottotitoli = [re.sub("<[^>]*>","",r) for r in sottotitoli]
 
-            completi = []
+            subtitles = subtitles[3:]
+            subtitles = [r for r in subtitles if not re.match("^\\s*\n", r)]
+            subtitles = [re.sub("<[^>]*>","",r) for r in subtitles]
+
+            complete = []
             prev = ''
             time = None
-            for r in sottotitoli:
+            for r in subtitles:
                 if r != prev:
                     if mm := re.match("^([0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}) --> ([0-9]{2}):([0-9]{2}):([0-9]{2}).([0-9]{3})", r):
                         time = datetime.datetime.strptime(mm.group(1) + '000', '%H:%M:%S.%f')
                     else:
-                        completi.append({
-                            'tempo': time,
-                            'testo': r
+                        complete.append({
+                            'time': time,
+                            'text': r
                             })
                         prev = r
 
-            output_path = os.path.join(output_foto, video_id)
-            os.mkdir(output_path)
             
-            file_immagini = open(f"{tempdir}/{video_id}.mhtml", 'rb')
+            output_path = os.path.join(output_foto, video_id)
+
+            try:
+                os.mkdir(output_path)
+            except FileExistsError:
+                for i in os.listdir(output_path):
+                    os.remove(os.path.join(output_path, i))
+
+            file_images = open(f"{tempdir}/{video_id}.mhtml", 'rb')
+            data_images = file_images.read()
+            file_images.close()
             w = 0
             h = 0
             for ff in entry['formats']:
                 if ff['format_id'] == "sb0":
                     w = ff['width']
                     h = ff['height']
-            immagini = fotogrammi.estrai_fotogrammi(file_immagini)
+            images = extract_frames(data_images)
             frames = []
-            for t,img in immagini:
-                frames += fotogrammi.taglia_fotogramma(img, w, h, t['inizio'], t['fine'])
+            for t,img in images:
+                frames += crop_frames(img, w, h, t['start'], t['end'])
 
             results = []
             ccc = 0
-            while len(completi)>0 or len(frames)>0:
-                if len(completi)>0 and (len(frames)==0 or completi[0]['tempo'] < frames[0][0]):
-                    results.append({'tipo':'testo', 'dati': completi[0]['testo']})
-                    completi = completi[1:]
+            while len(complete)>0 or len(frames)>0:
+                if len(complete)>0 and (len(frames)==0 or complete[0]['time'] < frames[0][0]):
+                    results.append({'type':'text', 'data': complete[0]['text']})
+                    complete = complete[1:]
                 else:
                     datt = frames[0][1]
                     impath = os.path.join(output_path, f"{ccc:03d}.png")
-                    results.append({'tipo': 'immagine', 'dati': impath})
+                    results.append({'type': 'image', 'data': impath})
                     datt.save(impath,"PNG")
                     ccc+=1
                     frames = frames[1:]
@@ -156,9 +173,9 @@ def get_sottotitoli(ricerca):
                 "copyright_note": f"'{title}' by {channel} on YouTube."
             })
             
-        output_dir = "subtitles"
+        output_dir = "results/subtitles"
         os.makedirs(output_dir, exist_ok=True)
 
-        output_path = os.path.join(output_dir, f"{ricerca.replace(' ', '_')}_subtitles.json")
+        output_path = os.path.join(output_dir, f"{research.replace(' ', '_')}_subtitles.json")
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(valid_videos, f, ensure_ascii=False, indent=2)

@@ -27,9 +27,11 @@ __pycache__/
 # Environment variables
 .env
 
-# Subtitles directory
-subtitles/
+# Results directory - It contains subtitles, frames and manuals directory
+results/
 
-# PDF Manuals Directory
+# PDF manuals directory
 src/manuals/
+
+
 
