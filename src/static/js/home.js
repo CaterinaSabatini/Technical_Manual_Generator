@@ -243,6 +243,33 @@ class TechGuideApp {
 
 }
 
+function search_model_option() {
+  // Declare variables
+  var input, filter, ul, li, a, i, txtValue;
+  input = document.getElementById('deviceInput');
+  filter = input.value.toUpperCase();
+  ul = document.getElementById("models-list");
+  li = ul.getElementsByTagName('li');
+
+  // Loop through all list items, and hide those who don't match the search query
+  for (i = 0; i < li.length; i++) {
+    a = li[i].getElementsByTagName("a")[0];
+    txtValue = a.textContent || a.innerText;
+    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+      li[i].style.display = "";
+    } else {
+      li[i].style.display = "none";
+    }
+  }
+}
+
+function select_device(model) {
+	input = document.getElementById('deviceInput');
+	button = document.getElementById('searchBtn');
+	input.value = model;
+	button.click();
+}
+
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new TechGuideApp();

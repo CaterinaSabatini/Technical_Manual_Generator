@@ -32,11 +32,17 @@
                             class="device-input" 
                             placeholder="Enter device name"
                             autocomplete="off"
+			    onkeyup="search_model_option()"
                         >
                         <button id="searchBtn" class="search-btn">
                             <span class="btn-text">Search</span>
                         </button>
                     </div>
+		    <ul id="models-list">
+			    {% for mod in models %}
+			    <li><a href="#" onclick="select_device('{{mod}}')">{{mod}}</a></li>
+			    {% endfor %}
+		    </ul>
                 </div>
             </section>
 
