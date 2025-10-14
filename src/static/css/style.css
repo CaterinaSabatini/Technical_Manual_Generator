@@ -152,7 +152,41 @@ body {
     transform: none;
 }
 
+/* Models List */
+#models-list {
+    list-style: none;
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 10px;
+    margin-bottom: 1rem;
+    padding: 0;
+    width: 100%;
+    max-width: 600px;
+}
 
+#models-list li {
+    padding: 8px 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#models-list li:last-child {
+    border-bottom: none;
+}
+
+#models-list li a {
+    color: var(--black);
+    text-decoration: none;
+    display: block;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+#models-list li:hover {
+    background-color: var(--light-gray);
+}
 
 /* Suggestions */
 .suggestions {

@@ -2,14 +2,21 @@ from flask import render_template, request, jsonify
 from .subtitles_controller import get_subtitles
 import sqlite3
 
+"""
+Home controller to render the home page with device models and handle subtitle search requests.
+@return HTML template for home page with device models.
+"""
 def home_controller():
-    """Home page controller"""
-    database = sqlite3.connect("../modelli.sqlite")
+    database = sqlite3.connect("devices_database/modelli.sqlite")
     cur = database.cursor()
     res = cur.execute("SELECT PROD, MODEL, SUBMODEL FROM MODELS ORDER BY PROD,MODEL,SUBMODEL;").fetchall()
     res = [' '.join(x) for x in res]
     return render_template('home.html', models=res)
 
+"""
+Handle subtitle search requests via API.
+@return JSON response indicating success or failure of the subtitle search.
+"""
 def search_subtitles_api():
     try:
         data = request.get_json()
