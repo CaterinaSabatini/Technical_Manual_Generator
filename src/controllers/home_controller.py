@@ -1,9 +1,14 @@
 from flask import render_template, request, jsonify
 from .subtitles_controller import get_subtitles
+import sqlite3
 
 def home_controller():
     """Home page controller"""
-    return render_template('home.html')
+    database = sqlite3.connect("../modelli.sqlite")
+    cur = database.cursor()
+    res = cur.execute("SELECT PROD, MODEL, SUBMODEL FROM MODELS ORDER BY PROD,MODEL,SUBMODEL;").fetchall()
+    res = [' '.join(x) for x in res]
+    return render_template('home.html', models=res)
 
 def search_subtitles_api():
     try:
