@@ -23,8 +23,7 @@
             <!-- Search Section -->
             <section id="searchSection" class="search-section">
                 <div class="search-container">
-                    <h2>Search for Device Manual</h2>
-                    <p class="search-note">Please enter the device name correctly! </p>
+                    <h2>Select the device</h2>
                     <div class="input-group">
                         <input 
                             type="text" 
@@ -32,16 +31,13 @@
                             class="device-input" 
                             placeholder="Enter device name"
                             autocomplete="off"
-			    onkeyup="search_model_option()"
                         >
-                        <button id="searchBtn" class="search-btn">
-                            <span class="btn-text">Search</span>
-                        </button>
                     </div>
 		    <ul id="models-list">
 			    {% for mod in models %}
-			    <li><a href="#" onclick="select_device('{{mod}}')">{{mod}}</a></li>
-			    {% endfor %}
+			    <!--<li><a href="#" onclick="select_device('{{mod}}')">{{mod}}</a></li>-->
+			    <li><a href="#" class="model-option" data-model="{{mod}}">{{mod}}</a></li>
+                {% endfor %}
 		    </ul>
                 </div>
             </section>

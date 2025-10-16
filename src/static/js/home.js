@@ -4,119 +4,102 @@
  */
 
 class TechGuideApp {
-    constructor() {
-        // Get references to DOM elements
-        this.homeBtn = document.getElementById('homeBtn');
-        this.searchBtn = document.getElementById('searchBtn');
-        this.downloadBtn = document.getElementById('downloadBtn');
-        this.retryBtn = document.getElementById('retryBtn');
-        this.deviceInput = document.getElementById('deviceInput');
-        
-        // Sections
-        this.searchSection = document.getElementById('searchSection');
-        this.loadingSection = document.getElementById('loadingSection');
-        this.resultsSection = document.getElementById('resultsSection');
-        this.errorSection = document.getElementById('errorSection');
-        
-        // Content containers
-        this.manualContainer = document.getElementById('manualContainer');
-        this.errorMessage = document.getElementById('errorMessage');
-        
-        // Current state
-        this.currentDevice = '';
-        
-        // Initialize app
-        this.init();
-    }
+  constructor() {
+    // Get references to DOM elements
+    this.homeBtn = document.getElementById('homeBtn');
+    this.downloadBtn = document.getElementById('downloadBtn');
+    this.retryBtn = document.getElementById('retryBtn');
+    this.deviceInput = document.getElementById('deviceInput');
+    this.modelsList = document.getElementById('models-list');
+    
+    // Sections
+    this.searchSection = document.getElementById('searchSection');
+    this.loadingSection = document.getElementById('loadingSection');
+    this.resultsSection = document.getElementById('resultsSection');
+    this.errorSection = document.getElementById('errorSection');
+    
+    // Content containers
+    this.manualContainer = document.getElementById('manualContainer');
+    this.errorMessage = document.getElementById('errorMessage');
+    
+    // Current state
+    this.currentDevice = '';
+    
+    // Initialize app
+    this.init();
+  }
 
-    /**
-     * Initialize the application
-     */
-    init() {
-        this.addEventListeners();
-        this.showHomeScreen();
-        //Simply puts the cursor directly into the input field
-        this.deviceInput.focus();
-    }
+  init() {
+    this.addEventListeners();
+    this.showHomeScreen();
+    this.deviceInput.focus();
+  }
 
-    /**
-     * Add event listeners to all buttons and inputs
-     */
-    addEventListeners() {
-        // Home button - return to search screen
-        this.homeBtn.addEventListener('click', () => {
-            this.showHomeScreen();
-        });
+  addEventListeners() {
+    // Home
+    this.homeBtn.addEventListener('click', () => this.showHomeScreen());
 
-        // Search button - search for device manual
-        this.searchBtn.addEventListener('click', () => {
-            this.searchManual();
-        });
+    // Download PDF
+    //this.downloadBtn.addEventListener('click', () => this.downloadPDF());
 
-        // Download button - download PDF manual
-        this.downloadBtn.addEventListener('click', () => {
-            this.downloadPDF();
-        });
+    // Retry
+    this.retryBtn.addEventListener('click', () => this.retrySearch());
 
-        // Retry button - retry the search
-        this.retryBtn.addEventListener('click', () => {
-            this.retrySearch();
-        });
+    this.deviceInput.addEventListener('input', () => this.filterModels());
+    // Reliable Enter on input
+    this.deviceInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.searchManual();
+      }
+    });
 
-        // Enter key on input field - trigger search
-        this.deviceInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.searchManual();
-            }
-        });
+    // Click on model (event delegation)
+    this.modelsList.addEventListener('click', (e) => {
+      const link = e.target.closest('a');
+      if (!link) return;
+      e.preventDefault();
+      const model = link.dataset.model || link.textContent.trim();
+      this.deviceInput.value = model;
+      this.deviceInput.focus();
+      this.searchManual();
+    });
 
-        // Input validation - enable/disable search button
-        this.deviceInput.addEventListener('input', () => {
-            this.validateInput();
-        });
-    }
+  }
 
-    /**
-     * Show home screen (search section)
-     */
-    showHomeScreen() {
-        this.hideAllSections();
-        this.searchSection.classList.remove('hidden');
-        this.homeBtn.classList.add('hidden');
-        this.deviceInput.value = '';
-        this.deviceInput.focus();
-        this.currentDevice = '';
-    }
+  showHomeScreen() {
+    this.hideAllSections();
+    this.searchSection.classList.remove('hidden');
+    this.homeBtn.classList.add('hidden');
+    this.deviceInput.value = '';
+    this.deviceInput.focus();
+    this.currentDevice = '';
+  }
 
-    /**
-     * Hide all sections
-     */
-    hideAllSections() {
-        this.searchSection.classList.add('hidden');
-        this.loadingSection.classList.add('hidden');
-        this.resultsSection.classList.add('hidden');
-        this.errorSection.classList.add('hidden');
-    }
+  hideAllSections() {
+    this.searchSection.classList.add('hidden');
+    this.loadingSection.classList.add('hidden');
+    this.resultsSection.classList.add('hidden');
+    this.errorSection.classList.add('hidden');
+  }
 
-    /**
-     * Validate input field
-     */
-    validateInput() {
-        const value = this.deviceInput.value.trim();
-        
-        if (value.length === 0) {
-            this.searchBtn.disabled = true;
-            this.searchBtn.classList.add('disabled');
-        } else {
-            this.searchBtn.disabled = false;
-            this.searchBtn.classList.remove('disabled');
-        }
-    }
+  filterModels() {
+  if (!this.modelsList) return;
+  const q = this.deviceInput.value.trim().toLowerCase();
+  const items = this.modelsList.querySelectorAll('li');
 
-    /**
-     * Search for device manual
-    */
-    async searchManual() {
+  let visibleCount = 0;
+  items.forEach(li => {
+    const txt = (li.textContent || '').trim().toLowerCase();
+    const show = q === '' ? true : txt.startsWith(q);  
+    li.style.display = show ? '' : 'none';
+    if (show) visibleCount++;
+  });
+  
+  this.modelsList.scrollTop = 0;
+}
+
+  async searchManual() {
         const device = this.deviceInput.value.trim();
         
         if (!device) {
@@ -139,7 +122,6 @@ class TechGuideApp {
             const data = await response.json();
 
             if (data.success) {
-                // Server returns pre-rendered HTML
                 this.showResults(data.html);
             } else {
                 this.showError(data.error || 'Manual not found for this device');
@@ -147,130 +129,75 @@ class TechGuideApp {
 
         } catch (error) {
             console.error('Search error:', error);
-            this.showError('Connection error. Please check your internet connection.');
-        }
-    }
-
-    /**
-     * Show loading screen
-     */
-    showLoading() {
-        this.hideAllSections();
-        this.loadingSection.classList.remove('hidden');
-        this.homeBtn.classList.remove('hidden');
-    }
-
-    /**
-     * Show search results
-     */
-    showResults(html) {
-        this.hideAllSections();
-        this.resultsSection.classList.remove('hidden');
-        this.homeBtn.classList.remove('hidden');
-        
-        // Simply insert the pre-rendered HTML from server
-        this.manualContainer.innerHTML = html;
-    }
-
-    /**
-     * Show error screen
-     */
-    showError(message) {
-        this.hideAllSections();
-        this.errorSection.classList.remove('hidden');
-        this.homeBtn.classList.remove('hidden');
-        
-        this.errorMessage.textContent = message;
-    }
-
-
-    /**
-     * Download PDF manual
-    
-    async downloadPDF() {
-        if (!this.currentDevice) {
-            this.showError('No device selected for download');
-            return;
-        }
-
-        try {
-            // Show loading state on download button
-            const originalText = this.downloadBtn.textContent;
-            this.downloadBtn.textContent = 'Generating PDF...';
-            this.downloadBtn.disabled = true;
-
-            // Simple approach: create direct download link
-            const downloadUrl = `/api/download-pdf?device=${encodeURIComponent(this.currentDevice)}`;
-            
-            // Create temporary link and trigger download
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = `${this.currentDevice}_manual.pdf`;
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // Show success feedback
-            this.downloadBtn.textContent = '✓ Downloaded';
-            setTimeout(() => {
-                this.downloadBtn.textContent = originalText;
-                this.downloadBtn.disabled = false;
-            }, 2000);
-
-        } catch (error) {
-            console.error('Download error:', error);
-            alert(`PDF download failed: ${error.message}`);
-            
-            // Reset button
-            this.downloadBtn.textContent = 'Download PDF Manual';
-            this.downloadBtn.disabled = false;
-        }
-    }
-    */
-    /**
-     * Retry search with current device
-     */
-    retrySearch() {
-        if (this.currentDevice) {
-            this.deviceInput.value = this.currentDevice;
-            this.searchManual();
-        } else {
-            this.showHomeScreen();
+            this.showError('Connection error. Please check your Internet connection.');
         }
     }
 
 
-}
 
-function search_model_option() {
-  // Declare variables
-  var input, filter, ul, li, a, i, txtValue;
-  input = document.getElementById('deviceInput');
-  filter = input.value.toUpperCase();
-  ul = document.getElementById("models-list");
-  li = ul.getElementsByTagName('li');
+  showLoading() {
+    this.hideAllSections();
+    this.loadingSection.classList.remove('hidden');
+    this.homeBtn.classList.remove('hidden');
+  }
 
-  // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < li.length; i++) {
-    a = li[i].getElementsByTagName("a")[0];
-    txtValue = a.textContent || a.innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      li[i].style.display = "";
+  showResults(html) {
+    this.hideAllSections();
+    this.resultsSection.classList.remove('hidden');
+    this.homeBtn.classList.remove('hidden');
+    this.manualContainer.innerHTML = html;
+  }
+
+  showError(message) {
+    this.hideAllSections();
+    this.errorSection.classList.remove('hidden');
+    this.homeBtn.classList.remove('hidden');
+    this.errorMessage.textContent = message;
+  }
+
+  /**async downloadPDF() {
+    if (!this.currentDevice) {
+      this.showError('No device selected for download');
+      return;
+    }
+    try {
+      const originalText = this.downloadBtn.textContent;
+      this.downloadBtn.textContent = 'Generating PDF...';
+      this.downloadBtn.disabled = true;
+
+      const downloadUrl = `/api/download-pdf?device=${encodeURIComponent(this.currentDevice)}`;
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `${this.currentDevice}_manual.pdf`;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      this.downloadBtn.textContent = '✓ Downloaded';
+      setTimeout(() => {
+        this.downloadBtn.textContent = originalText;
+        this.downloadBtn.disabled = false;
+      }, 2000);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert(`PDF download failed: ${error.message}`);
+      this.downloadBtn.textContent = 'Download PDF Manual';
+      this.downloadBtn.disabled = false;
+    }
+  }*/
+
+  retrySearch() {
+    if (this.currentDevice) {
+      this.deviceInput.value = this.currentDevice;
+      this.searchManual();
     } else {
-      li[i].style.display = "none";
+      this.showHomeScreen();
     }
   }
 }
 
-function select_device(model) {
-	input = document.getElementById('deviceInput');
-	button = document.getElementById('searchBtn');
-	input.value = model;
-	button.click();
-}
-
-// Initialize the application when DOM is loaded
+// Init
 document.addEventListener('DOMContentLoaded', () => {
-    new TechGuideApp();
+  window.techGuideApp = new TechGuideApp();
 });
