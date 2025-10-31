@@ -2,6 +2,19 @@ from flask import render_template, request, jsonify
 from .subtitles_controller import get_subtitles
 import sqlite3
 
+def formatta_nome(prod, fam, subfam, showsubfam, model):
+    pezzi = []
+    if prod is not None:
+        pezzi.append(prod)
+    if fam is not None:
+        pezzi.append(fam)
+    if subfam is not None and showsubfam != 1:
+        pezzi.append(subfam)
+    if model is not None:
+        pezzi.append(model)
+    return ' '.join(map(str, pezzi))
+
+
 """
 Home controller to render the home page with device models and handle subtitle search requests.
 @return HTML template for home page with device models.
@@ -9,8 +22,9 @@ Home controller to render the home page with device models and handle subtitle s
 def home_controller():
     database = sqlite3.connect("devices_database/modelli.sqlite")
     cur = database.cursor()
-    res = cur.execute("SELECT PROD, MODEL, SUBMODEL FROM MODELS ORDER BY PROD,MODEL,SUBMODEL;").fetchall()
-    res = [' '.join(x) for x in res]
+    res = cur.execute("SELECT MODEL.prod,MODEL.model,FAMILIES.fam,FAMILIES.subfam,FAMILIES.showsubfam FROM MODEL JOIN FAMILIES ON MODEL.idfam = FAMILIES.id;")
+    res = [formatta_nome(x[0],x[2],x[3],x[4],x[1]) for x in res]
+    res.sort()
     return render_template('home.html', models=res)
 
 """
