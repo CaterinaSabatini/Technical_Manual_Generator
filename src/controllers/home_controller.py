@@ -51,6 +51,18 @@ def search_subtitles_api():
                 'error': 'Device name is required'
             }), 400
         
+        database = sqlite3.connect("devices_database/modelli.sqlite")
+        cur = database.cursor()
+        allowed_names = cur.execute("SELECT MODEL.prod,MODEL.model,FAMILIES.fam,FAMILIES.subfam,FAMILIES.showsubfam FROM MODEL JOIN FAMILIES ON MODEL.idfam = FAMILIES.id;")
+        allowed_names = [formatta_nome(x[0],x[2],x[3],x[4],x[1]) for x in allowed_names]
+
+        if device not in allowed_names:
+            return jsonify({
+                'success': False,
+                'status': 'error',
+                'error': 'Device name is not a known device'
+            }), 400
+
         get_subtitles(device)
         
         return jsonify({
