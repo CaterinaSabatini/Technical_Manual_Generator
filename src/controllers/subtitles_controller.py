@@ -4,23 +4,23 @@ import json
 import re
 import tempfile
 import datetime
+import os
+import json
+from flask import jsonify
+from dotenv import load_dotenv
 from .frames_controller import extract_frames, crop_frames
+from .video_validator_controller import ask_llm, is_valid_video
+from .llm_controller import ensure_ollama_up
+
+load_dotenv()
+
+MAX_VIDEOS = int(os.getenv('MAX_VIDEOS'))
 
 
 #Keywords to be reviewed taking into account the sources found on Internet
 KEYWORDS = [
-    "teardown", "disassembly", "repair", "fix", "remove",
-    "replace", "replacement", "unscrew","removal", "step by step"
+    "teardown", "disassembly", "repair"
 ]
-
-#Maximum number of videos to analyze
-MAX_VIDEOS = 3
-
-#Validation parameters for video selection
-MIN_VIEWS = 10000
-MIN_DURATION = 60 # seconds
-MAX_DURATION = 3600 # 1h 
-MIN_LIKE_RATIO = 0.7 # min 70% likes vs total votes
 
 """
 Check if the video info contains any of the specified keywords in title or description
@@ -29,31 +29,8 @@ Check if the video info contains any of the specified keywords in title or descr
 @return: True if any keyword is found, False otherwise
 """
 def contains_keywords(info):
-    combined_text= (info.get('title', '') + " " + info.get('description', '')).lower()
+    combined_text= info.get('title', '') 
     return any(k.lower() in combined_text for k in KEYWORDS)
-
-"""
-Check if the video meets all the criteria for selection
-
-@param entry: dictionary containing video information
-@return: True if the video is valid, False otherwise
-"""
-def is_valid_video(entry):
-    views = entry.get('view_count', 0)
-    duration = entry.get('duration', 0)
-
-    if (like_count := entry.get('like_count')) is None:
-        like_count = 0
-    if (dislike_count := entry.get('dislike_count')) is None:
-        dislike_count = 0
-    total_votes = like_count + dislike_count
-    ratio_votes = like_count / total_votes if total_votes > 0 else 1
-
-    return (
-        views >= MIN_VIEWS and
-        MIN_DURATION <= duration <= MAX_DURATION and
-        ratio_votes >= MIN_LIKE_RATIO
-    )
 
 """
 Get subtitles and frames from YouTube videos based on a search term
@@ -70,32 +47,51 @@ def get_subtitles(research):
             "format": 'sb0',
             "writesubtitles": True,
             "writeautomaticsub": True,
+            "subtitlesformat": "vtt",
+            "subtitleslangs": ["en", "-livechat"],
             "outtmpl":{
                 'subtitle': f"{tempdir}/%(id)s",
                 'default': f"{tempdir}/%(id)s.mhtml"
                 }
         })
 
-        
-        data = downloader.extract_info(f"ytsearch{MAX_VIDEOS}:{research}")
+        search_query = ' '.join([research] + KEYWORDS)
+        data = downloader.extract_info(f"ytsearch{MAX_VIDEOS}:{search_query}")
 
         with open(os.path.join(tempdir, "data.json"), "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        
 
         valid_videos = []
 
         output_foto = "results/frames"
         os.makedirs(output_foto, exist_ok=True)
 
-        
         for entry in data.get('entries', []):
-            if not entry or not is_valid_video(entry):
+            if not entry:
                 continue
+
+            title = entry.get("title", "")
+
+            #if not ensure_ollama_up():
+            #    return jsonify({
+             #   'success': False,
+              #  'status': 'error',
+               # 'message': f'Unexpected error when connecting to Llama. Please try again."',
+            #})
+
+            if not is_valid_video(entry):
+                print(title)
+                continue
+
+            llm_response = ask_llm(research, title)
+            print("ciao")
+            if not llm_response.get("match", False):
+                #qua dentro non ci entra
+                continue
+    
             video_id = entry["id"]
             url = entry["webpage_url"]
             channel = entry.get("uploader") or entry.get("channel") or "Unknown"
-            title = entry.get("title", "")
             duration = entry.get("duration", 0)
             views = entry.get("view_count", 0)
 
