@@ -49,8 +49,8 @@ RETURN JSON with keys:
   "reason": "short explanation"
 }
 
-Device: "{device}"
-Title: "{title}"
+Device: "SEGNAPOSTO_DISPOSITIVO"
+Title: "SEGNAPOSTO_TITOLO"
 """.strip()
 
 def ask_llm(device, title):
@@ -63,7 +63,7 @@ def ask_llm(device, title):
             print("No title was found")
             return {"match": False, "score": 0.0, "reason": "No title was found"}
         
-        prompt = PROMPT_TEMPLATE.format(device=device, title=title)
+        prompt = PROMPT_TEMPLATE.replace("SEGNAPOSTO_DISPOSITIVO",device).replace("SEGNAPOSTO_TITOLO", title)
         
         payload = {
             "model": OLLAMA_MODEL,
@@ -89,7 +89,7 @@ def ask_llm(device, title):
             "stop": ["```", "\n```", "\n\n\n"] 
         }
 
-        r = requests.post(OLLAMA_URL, json=payload, timeoute = 120)
+        r = requests.post(OLLAMA_URL, json=payload, timeout = 120)
         r.raise_for_status()
         raw = r.json().get("response", "")
         m = re.search(r'\{.*\}', raw, re.DOTALL)
