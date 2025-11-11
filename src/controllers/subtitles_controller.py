@@ -9,12 +9,13 @@ import json
 from flask import jsonify
 from dotenv import load_dotenv
 from .frames_controller import extract_frames, crop_frames
-from .video_validator_controller import ask_llm, is_valid_video
+from .video_validator_controller import ask_llm, is_valid_video, filter_llm
 from .llm_controller import ensure_ollama_up
 
 load_dotenv()
 
 MAX_VIDEOS = int(os.getenv('MAX_VIDEOS'))
+MAX_SEARCH = 50
 
 
 #Keywords to be reviewed taking into account the sources found on Internet
@@ -41,6 +42,9 @@ Get subtitles and frames from YouTube videos based on a search term
 def get_subtitles(research):
 
     with tempfile.TemporaryDirectory() as tempdir:
+        searcher = YoutubeDL({
+            "skip_download": True,
+        })
 
         downloader = YoutubeDL({
             "skip_download": False,
@@ -56,15 +60,14 @@ def get_subtitles(research):
         })
 
         search_query = ' '.join([research] + KEYWORDS)
-        data = downloader.extract_info(f"ytsearch{MAX_VIDEOS}:{search_query}")
-
-        with open(os.path.join(tempdir, "data.json"), "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        data = searcher.extract_info(f"ytsearch{MAX_SEARCH}:{search_query}")
 
         valid_videos = []
 
         output_foto = "results/frames"
         os.makedirs(output_foto, exist_ok=True)
+
+        video_scelti = []
 
         for entry in data.get('entries', []):
             if not entry:
@@ -82,15 +85,18 @@ def get_subtitles(research):
             if not is_valid_video(entry):
                 print(title)
                 continue
+            else:
+                video_scelti.append(entry)
 
-            llm_response = ask_llm(research, title)
-            print("ciao")
-            if not llm_response.get("match", False):
-                #qua dentro non ci entra
-                continue
-    
+        video_scelti = filter_llm(video_scelti, MAX_VIDEOS, research)
+        print("-------------------")
+        print('\n'.join([x['title'] for x in video_scelti]))
+
+        for entry in video_scelti:
             video_id = entry["id"]
+            title = entry["title"]
             url = entry["webpage_url"]
+            downloader.download(url)
             channel = entry.get("uploader") or entry.get("channel") or "Unknown"
             duration = entry.get("duration", 0)
             views = entry.get("view_count", 0)
