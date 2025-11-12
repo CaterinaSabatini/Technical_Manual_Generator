@@ -1,5 +1,6 @@
 import requests, os
 import subprocess
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -28,6 +29,7 @@ def ensure_ollama_up(url=OLLAMA_TEST, timeout=2):
             attempt = attempt + 1
             if attempt > MAX_RETRIES:
                 print(f"Error connecting to Llama")
+                time.sleep(1)
                 return False
     
 
