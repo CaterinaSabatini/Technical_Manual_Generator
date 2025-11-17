@@ -5,27 +5,29 @@
 
 class TechGuideApp {
   constructor() {
-    // Get references to DOM elements
+
     this.homeBtn = document.getElementById('homeBtn');
     this.downloadBtn = document.getElementById('downloadBtn');
-    this.retryBtn = document.getElementById('retryBtn');
-    this.deviceInput = document.getElementById('deviceInput');
-    this.modelsList = document.getElementById('models-list');
+    this.goBackBtn = document.getElementById('goBackBtn');
     
-    // Sections
+ 
+    this.searchBtn = document.getElementById('searchBtn'); 
+    this.deviceInput = document.getElementById('deviceInput');
+    
+    
     this.searchSection = document.getElementById('searchSection');
     this.loadingSection = document.getElementById('loadingSection');
     this.resultsSection = document.getElementById('resultsSection');
     this.errorSection = document.getElementById('errorSection');
     
-    // Content containers
+    
     this.manualContainer = document.getElementById('manualContainer');
     this.errorMessage = document.getElementById('errorMessage');
     
-    // Current state
+    
     this.currentDevice = '';
     
-    // Initialize app
+    
     this.init();
   }
 
@@ -36,17 +38,21 @@ class TechGuideApp {
   }
 
   addEventListeners() {
-    // Home
+    
     this.homeBtn.addEventListener('click', () => this.showHomeScreen());
 
-    // Download PDF
+    // Download PDF 
     //this.downloadBtn.addEventListener('click', () => this.downloadPDF());
 
-    // Retry
-    this.retryBtn.addEventListener('click', () => this.retrySearch());
+    
+    this.goBackBtn.addEventListener('click', () => this.showHomeScreen());
+    
+    
+    this.searchBtn.addEventListener('click', () => this.searchManual());
 
-    this.deviceInput.addEventListener('input', () => this.filterModels());
-    // Reliable Enter on input
+    // this.deviceInput.addEventListener('input', () => this.filterModels());
+
+    
     this.deviceInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -54,7 +60,8 @@ class TechGuideApp {
       }
     });
 
-    // Click on model (event delegation)
+    
+    /*
     this.modelsList.addEventListener('click', (e) => {
       const link = e.target.closest('a');
       if (!link) return;
@@ -64,7 +71,7 @@ class TechGuideApp {
       this.deviceInput.focus();
       this.searchManual();
     });
-
+    */
   }
 
   showHomeScreen() {
@@ -83,56 +90,58 @@ class TechGuideApp {
     this.errorSection.classList.add('hidden');
   }
 
-  filterModels() {
-  if (!this.modelsList) return;
-  const q = this.deviceInput.value.trim().toLowerCase();
-  const items = this.modelsList.querySelectorAll('li');
 
-  let visibleCount = 0;
-  items.forEach(li => {
-    const txt = (li.textContent || '').trim().toLowerCase();
-    const show = q === '' ? true : txt.startsWith(q);  
-    li.style.display = show ? '' : 'none';
-    if (show) visibleCount++;
-  });
-  
-  this.modelsList.scrollTop = 0;
-}
+  /*
+  filterModels() {
+    if (!this.modelsList) return;
+    const q = this.deviceInput.value.trim().toLowerCase();
+    const items = this.modelsList.querySelectorAll('li');
+
+    let visibleCount = 0;
+    items.forEach(li => {
+      const txt = (li.textContent || '').trim().toLowerCase();
+      const show = q === '' ? true : txt.startsWith(q); 
+      li.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+    
+    this.modelsList.scrollTop = 0;
+  }
+  */
 
   async searchManual() {
-        const device = this.deviceInput.value.trim();
-        
-        if (!device) {
-            this.showError('Please enter a device name');
-            return;
-        }
-
-        this.currentDevice = device;
-        this.showLoading();
-
-        try {
-            const response = await fetch('/api/search-subtitles', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ device: device })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.showResults(data.html);
-            } else {
-                this.showError(data.error || 'Manual not found for this device');
-            }
-
-        } catch (error) {
-            console.error('Search error:', error);
-            this.showError('Connection error. Please check your Internet connection.');
-        }
+    const device = this.deviceInput.value.trim();
+    
+    if (!device) {
+      this.showError('Please enter a device name');
+      return;
     }
 
+    this.currentDevice = device;
+    this.showLoading();
+
+    try {
+      const response = await fetch('/api/search-subtitles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ device: device })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        this.showResults(data.html);
+      } else {
+        this.showError(data.error || 'Manual not found for this device');
+      }
+
+    } catch (error) {
+      console.error('Search error:', error);
+      this.showError('Connection error. Please check your Internet connection.');
+    }
+  }
 
 
   showLoading() {
@@ -197,7 +206,7 @@ class TechGuideApp {
   }
 }
 
-// Init
+
 document.addEventListener('DOMContentLoaded', () => {
   window.techGuideApp = new TechGuideApp();
 });

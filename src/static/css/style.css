@@ -1,5 +1,4 @@
 /* TechGuide - Home Page Styles */
-/* Color Palette: White, Black, Blue, Light Blue */
 
 :root {
     --primary-blue: #0066cc;
@@ -103,16 +102,17 @@ body {
     font-style: italic;
 }
 
+/* Aggiornamento: Input Group per allineare campo e pulsante */
 .input-group {
     display: flex;
     gap: 1rem;
     margin-bottom: 0.74rem;
-    flex-wrap: wrap;
+    /* Rimosso flex-wrap per mantenere input e pulsante affiancati su schermi larghi */
 }
 
 .device-input {
-    flex: 1;
-    min-width: 300px;
+    flex: 1; /* Permette all'input di occupare lo spazio rimanente */
+    min-width: 250px; /* Ridotto il min-width per una migliore gestione dello spazio */
     padding: 1rem 1.5rem;
     border: 2px solid var(--border-color);
     border-radius: 50px;
@@ -128,7 +128,7 @@ body {
     box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
 }
 
-/*.search-btn {
+.search-btn {
     background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
     color: var(--white);
     border: none;
@@ -141,8 +141,10 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    min-width: 180px;
+    min-width: 150px; /* Leggermente ridotto per una migliore reattività */
     justify-content: center;
+    /* Aggiunto per allineamento nel flexbox */
+    align-self: flex-start;
 }
 
 .search-btn:hover:not(.disabled) {
@@ -154,43 +156,10 @@ body {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
-}*/
-
-/* Models List */
-#models-list {
-    list-style: none;
-    background-color: var(--white);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    max-height: 250px;
-    overflow-y: auto;
-    margin-top: 4px;
-    margin-bottom: 1rem;
-    padding: 0;
-    width: 100%;
-    max-width: 600px;
 }
 
-#models-list li {
-    padding: 8px 15px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-#models-list li:last-child {
-    border-bottom: none;
-}
-
-#models-list li a {
-    color: var(--black);
-    text-decoration: none;
-    display: block;
-    font-size: 0.95rem;
-    transition: color 0.2s;
-}
-
-#models-list li:hover {
-    background-color: var(--light-gray);
-}
+/* Stili per la lista dei modelli rimossi in quanto non più necessaria nel DOM */
+/* Sezione #models-list completamente rimossa */
 
 /* Suggestions */
 .suggestions {
@@ -402,7 +371,7 @@ body {
 
 
 .error-container h3 {
-    color: #dc2626;
+    color: #000000;
     margin-bottom: 1rem;
 }
 
@@ -452,19 +421,20 @@ body {
         font-size: 1rem;
     }
     
+    /* Nuovo stile per il gruppo di input su schermi più piccoli */
     .input-group {
-        flex-direction: column;
+        flex-direction: column; /* Impila input e pulsante verticalmente */
+        gap: 0.75rem;
     }
     
     .device-input {
         min-width: auto;
     }
     
-    /*
     .search-btn {
-        min-width: auto;
+        min-width: 100%; /* Il pulsante occupa l'intera larghezza */
         justify-content: center;
-    }*/
+    }
     
     .suggestion-chips {
         gap: 0.3rem;
@@ -610,4 +580,3 @@ body {
 .warnings-section h3 {
     color: #dc2626 !important;
 }
-

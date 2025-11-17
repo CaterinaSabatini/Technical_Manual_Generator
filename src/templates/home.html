@@ -9,7 +9,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <header class="header">
             <div class="header-content">
                 <button id="homeBtn" class="home-btn hidden">Home</button>
@@ -18,12 +17,10 @@
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Search Section -->
             <section id="searchSection" class="search-section">
                 <div class="search-container">
-                    <h2>Select the device</h2>
+                    <h2>Search a device</h2>
                     <div class="input-group">
                         <input 
                             type="text" 
@@ -32,17 +29,11 @@
                             placeholder="Enter device name"
                             autocomplete="off"
                         >
+                        <button id="searchBtn" class="search-btn">Search</button>
                     </div>
-		    <ul id="models-list">
-			    {% for mod in models %}
-			    <!--<li><a href="#" onclick="select_device('{{mod}}')">{{mod}}</a></li>-->
-			    <li><a href="#" class="model-option" data-model="{{mod}}">{{mod}}</a></li>
-                {% endfor %}
-		    </ul>
-                </div>
+                    </div>
             </section>
 
-            <!-- Loading Section -->
             <section id="loadingSection" class="loading-section hidden">
                 <div class="loading-container">
                     <div class="spinner"></div>
@@ -50,7 +41,6 @@
                 </div>
             </section>
 
-            <!-- Results -->
             <section id="resultsSection" class="results-section hidden">
                 <div class="manual-container" id="manualContainer">
                 </div>
@@ -61,13 +51,12 @@
                 </div>
             </section>
 
-            <!-- Error Section -->
             <section id="errorSection" class="error-section hidden">
                 <div class="error-container">
                     <h3>Manual Not Found</h3>
                     <p id="errorMessage">An error occurred while searching for the manual.</p>
                     <div class="error-actions">
-                        <button id="retryBtn" class="retry-btn">Retry</button>
+                        <button id="goBackBtn" class="download-btn">Go Back to Search</button>
                     </div>
                 </div>
             </section>

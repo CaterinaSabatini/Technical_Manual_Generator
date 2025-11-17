@@ -1,33 +1,12 @@
 from flask import render_template, request, jsonify
 from .subtitles_controller import get_subtitles
-import sqlite3
-
-def formatta_nome(prod, fam, subfam, showsubfam, model, submodel):
-    pezzi = []
-    if prod is not None:
-        pezzi.append(prod)
-    if fam is not None:
-        pezzi.append(fam)
-    if subfam is not None and showsubfam == 1:
-        pezzi.append(subfam)
-    if model is not None:
-        pezzi.append(model)
-    if submodel is not None:
-        pezzi.append(submodel)
-    return ' '.join(map(str, pezzi))
-
 
 """
 Home controller to render the home page with device models and handle subtitle search requests.
 @return HTML template for home page with device models.
 """
 def home_controller():
-    database = sqlite3.connect("devices_database/modelli.sqlite")
-    cur = database.cursor()
-    res = cur.execute("SELECT MODEL.prod,MODEL.model,FAMILIES.fam,FAMILIES.subfam,FAMILIES.showsubfam,MODEL.submodel FROM MODEL JOIN FAMILIES ON MODEL.idfam = FAMILIES.id;")
-    res = [formatta_nome(x[0],x[2],x[3],x[4],x[1],x[5]) for x in res]
-    res.sort()
-    return render_template('home.html', models=res)
+    return render_template('home.html')
 
 """
 Handle subtitle search requests via API.
@@ -53,19 +32,10 @@ def search_subtitles_api():
                 'error': 'Device name is required'
             }), 400
         
-        database = sqlite3.connect("devices_database/modelli.sqlite")
-        cur = database.cursor()
-        allowed_names = cur.execute("SELECT MODEL.prod,MODEL.model,FAMILIES.fam,FAMILIES.subfam,FAMILIES.showsubfam,MODEL.submodel FROM MODEL JOIN FAMILIES ON MODEL.idfam = FAMILIES.id;")
-        allowed_names = [formatta_nome(x[0],x[2],x[3],x[4],x[1],x[5]) for x in allowed_names]
+        search_result = get_subtitles(device)
 
-        if device not in allowed_names:
-            return jsonify({
-                'success': False,
-                'status': 'error',
-                'error': 'Device name is not a known device'
-            }), 400
-
-        get_subtitles(device)
+        if isinstance(search_result, tuple):
+            return search_result
         
         return jsonify({
             'success': True,
@@ -78,5 +48,5 @@ def search_subtitles_api():
         return jsonify({
             'success': False,
             'status': 'error',
-            'error': f'{str(e)}'
+            'error': f'An error occurred during manual search. Please try again later.'
         }), 500
