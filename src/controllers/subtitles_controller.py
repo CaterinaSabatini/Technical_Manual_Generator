@@ -116,6 +116,7 @@ def get_subtitles(research):
             "skip_download": True,
             "writesubtitles": True,
             "writeautomaticsub": True,
+            "ignoreerrors": True,
             "subtitlesformat": "vtt",
             "subtitleslangs": ["en", "-livechat"],
             "outtmpl":{
