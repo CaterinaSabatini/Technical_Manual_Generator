@@ -150,11 +150,21 @@ class TechGuideApp {
     this.homeBtn.classList.remove('hidden');
   }
 
-  showResults(html) {
+  showResults(steps) {
     this.hideAllSections();
     this.resultsSection.classList.remove('hidden');
     this.homeBtn.classList.remove('hidden');
-    this.manualContainer.innerHTML = html;
+    steps = JSON.parse(steps).steps
+    let nsect = document.createElement('section');
+    steps.forEach((st) => {
+	    let tit = document.createElement('h3');
+	    tit.innerText = st.title ;
+	    let desc = document.createElement('p');
+	    desc.innerText = st.description;
+	    nsect.appendChild(tit);
+	    nsect.appendChild(desc);
+    });
+    this.manualContainer.appendChild(nsect) ;
   }
 
   showError(message) {

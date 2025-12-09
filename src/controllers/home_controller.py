@@ -32,7 +32,9 @@ def search_subtitles_api():
                 'error': 'Device name is required'
             }), 400
         
-        search_result = get_subtitles(device)
+        (status,search_result) = get_subtitles(device)
+        print(f"========={status}===========")
+        print(search_result)
 
         if isinstance(search_result, tuple):
             return search_result
@@ -42,6 +44,7 @@ def search_subtitles_api():
             'status': 'ok',
             'device': device,
             'message': f'Subtitle search completed for "{device}"',
+            'html': search_result
         }), 200
         
     except Exception as e:
