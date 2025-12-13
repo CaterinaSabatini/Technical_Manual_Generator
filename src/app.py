@@ -2,7 +2,7 @@ import os
 import atexit
 from flask import Flask
 from dotenv import load_dotenv
-from controllers.home_controller import home_controller, search_subtitles_api
+from controllers.home_controller import home_controller, manual_generation_api, download_pdf_api
 from controllers.llm_controller import ensure_ollama_up, terminate_ollama
 
 # Load environment variables from .env file
@@ -20,19 +20,13 @@ if not ensure_ollama_up():
 # Ensure Ollama is terminated when the application exits
 atexit.register(terminate_ollama)
 
-@app.route('/api/search-subtitles', methods=['POST'])
-def search_subtitles():
-    return search_subtitles_api()
-
-"""
-@app.route('/api/generate', methods=['POST'])
-def generate_manual():
- 
-return generate_manual_api()
+@app.route('/api/manual-generation', methods=['POST'])
+def manual_generation():
+    return manual_generation_api()
 
 @app.route('/api/download-pdf')
 def download_pdf():
     return download_pdf_api()
-"""
+
 if __name__ == '__main__':
     app.run(host=os.getenv('FLASK_HOST'), port=os.getenv('FLASK_PORT'), debug=os.getenv('FLASK_DEBUG'))

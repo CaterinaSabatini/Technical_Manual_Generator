@@ -28,4 +28,3 @@ START HTML OUTPUT NOW:
     <p>Unfasten the four pentalobe screws along the edges. Use a suction cup to break the magnetic seal, then slide the bottom case toward the trackpad to release the four retaining prongs and lift it off.</p>
 </li>
 <li>
-
