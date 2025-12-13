@@ -1,0 +1,43 @@
+<!-- Manual Template -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Disassembly manual for {{ device_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/manual.css') }}">
+    <script src="{{ url_for('static', filename='js/home.js') }}" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">Disassembly Manual</h1>
+            <p class="subtitle">for {{ device_name }}</p>
+        </div>
+    </header>
+
+    <div class="container main-content">
+
+        <div class="manual-container" id="manualContainer">
+            <ol class="manual-steps">
+                {% for step in steps %}
+                <li>
+                    <div class="step-title">{{ step.title }}</div>
+                    <div class="step-description">{{ step.description }}</div>
+                </li>
+                {% endfor %}
+            </ol>
+
+            <div class="generated-time">
+                Generated on {{ timestamp }} by TechGuide
+            </div>
+
+        <div class="action-buttons">
+            <button id="goBackBtn" class="home-btn">Go Back</button>
+            <button id="downloadBtn" class="download-btn">Download PDF</button>
+        </div>
+        
+        </div>
+    </div>
+</body>
+</html>

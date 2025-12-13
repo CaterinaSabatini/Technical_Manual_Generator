@@ -16,6 +16,7 @@ MAX_VIDEOS = int(os.getenv('MAX_VIDEOS'))
 MAX_SEARCH = int(os.getenv('MAX_SEARCH'))
 OLLAMA_URL = os.getenv('OLLAMA_URL')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
+
 KEYWORDS = [
     "teardown", "disassembly", "repair"
 ]
@@ -93,56 +94,10 @@ def contains_keywords(info):
     return any(k.lower() in combined_text for k in KEYWORDS)
 
 """
-Generate report from subtitles using the llm
-
-@param data: list of dictionaries containing video data
-@return: a string of html-formatted document
-"""
-def report_llm(data):
-    prompt = """
-    in the following sectionyou will be given the subtitles in JSON format of multiple youtube videos where people disassemble and repair computers, you should create a step-by-step guide for people to follow doing the same thing, the guide should be in JSON format as a list of steps like this, without anything added, only JSON:
-    [
-        {
-            "title": STEP_TITLE,
-            "description": DESCRIPTION_OF_STEP
-        },
-        ...
-    ]
-    the output MUST be a list with MULTIPLE steps
-
-
-
-    
-    input:
-    """
-    subs = data[0]["subtitles_data"]
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": prompt+json.dumps(subs),
-        "options": {
-            "temperature": 0.0,
-            "seed": 1,
-            "top_k": 10,
-            "top_p": 0.1,
-            "min_p": 0,
-            "repeat_penalty": 1.15,
-            "mirostat": 0
-        },
-        "format": "json",
-        "stream": False,
-        "stop": ["```", "\n```", "\n\n\n"] 
-    }
-    print(prompt+json.dumps(data))
-    r = requests.post(OLLAMA_URL, json=payload, timeout=120)
-    print(r)
-    response = r.json()
-    return response['response']
-
-"""
 Get subtitles from YouTube videos based on a search term
 
 @param research: search term for finding relevant videos
-@return: None (results are saved to a JSON file)
+@return: tuple (status, subtitles data or error message)
 """
 def get_subtitles(research):
 
@@ -275,4 +230,4 @@ def get_subtitles(research):
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(valid_videos, f, ensure_ascii=False, indent=2)
 
-        return (True,report_llm(valid_videos))
+        return "ok", valid_videos
