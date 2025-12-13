@@ -9,7 +9,7 @@ load_dotenv()
 #Ollama environment variables
 OLLAMA_URL = os.getenv('OLLAMA_URL')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
-PROMPT_TEMPLATE_PATH = os.getenv('PROMPT_TEMPLATE')
+PROMPT_TEMPLATE_SUBTITLES_PATH = os.getenv('PROMPT_SUBTITLES')
 
 #Validation parameters
 MIN_VIEWS = int(os.getenv('MIN_VIEWS'))
@@ -18,19 +18,19 @@ MAX_DURATION = int(os.getenv('MAX_DURATION'))
 MIN_LIKE_RATIO = float(os.getenv('MIN_LIKE_RATIO'))
 
 
-if not PROMPT_TEMPLATE_PATH:
-    raise ValueError("The environment variable 'PROMPT_TEMPLATE' is not set.")
+if not PROMPT_TEMPLATE_SUBTITLES_PATH:
+    raise ValueError("The environment variable for LLM is not set.")
 
 
 try:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    FULL_PROMPT_PATH = os.path.join(BASE_DIR, '..', PROMPT_TEMPLATE_PATH) 
+    FULL_PROMPT_PATH = os.path.join(BASE_DIR, '..', PROMPT_TEMPLATE_SUBTITLES_PATH) 
 
     with open(FULL_PROMPT_PATH, 'r', encoding='utf-8') as f:
         FILTER_PROMPT_TEMPLATE = f.read().strip()
     
 except FileNotFoundError:
-    raise FileNotFoundError(f"Error: Could not find file at path: {FULL_PROMPT_PATH}. Check your PROMPT_TEMPLATE setting in .env.")
+    raise FileNotFoundError(f"Error: Could not find file at path. Check your settings in .env.")
 
 
 """
@@ -65,7 +65,7 @@ def filter_llm(videos, count, model):
     
 
     l_video = '\n'.join(['; '.join((r['id'],r['title'])) for r in videos]) + '\n'
-    
+
     prompt = (
         FILTER_PROMPT_TEMPLATE
         .replace("DEVICE_MODEL_PLACEHOLDER", model)
@@ -100,16 +100,16 @@ def filter_llm(videos, count, model):
         m = re.search(r'\{.*\}', raw, re.DOTALL)
         
         if not m:
-            print(f"Warning: No JSON block found in LLM response. Response: {raw[:100]}...")
+            print(f"Warning: No JSON block found in LLM response.")
             return []
         
         resp = json.loads(m.group(0))
         
     except requests.exceptions.RequestException as e:
-        print(f"Network error during Ollama call: {e}")
+        print(f"Network error during Ollama call.")
         return []
     except json.JSONDecodeError as e:
-        print(f"JSON parsing error from Ollama response: {e}. Raw: {raw}")
+        print(f"JSON parsing error from Ollama response.")
         return []
     
     ret = []

@@ -40,17 +40,9 @@ class TechGuideApp {
   addEventListeners() {
     
     this.homeBtn.addEventListener('click', () => this.showHomeScreen());
-
-    // Download PDF 
-    //this.downloadBtn.addEventListener('click', () => this.downloadPDF());
-
-    
+    this.downloadBtn.addEventListener('click', () => this.downloadPDF());
     this.goBackBtn.addEventListener('click', () => this.showHomeScreen());
-    
-    
     this.searchBtn.addEventListener('click', () => this.searchManual());
-
-    // this.deviceInput.addEventListener('input', () => this.filterModels());
 
     
     this.deviceInput.addEventListener('keydown', (e) => {
@@ -60,18 +52,6 @@ class TechGuideApp {
       }
     });
 
-    
-    /*
-    this.modelsList.addEventListener('click', (e) => {
-      const link = e.target.closest('a');
-      if (!link) return;
-      e.preventDefault();
-      const model = link.dataset.model || link.textContent.trim();
-      this.deviceInput.value = model;
-      this.deviceInput.focus();
-      this.searchManual();
-    });
-    */
   }
 
   showHomeScreen() {
@@ -90,25 +70,6 @@ class TechGuideApp {
     this.errorSection.classList.add('hidden');
   }
 
-
-  /*
-  filterModels() {
-    if (!this.modelsList) return;
-    const q = this.deviceInput.value.trim().toLowerCase();
-    const items = this.modelsList.querySelectorAll('li');
-
-    let visibleCount = 0;
-    items.forEach(li => {
-      const txt = (li.textContent || '').trim().toLowerCase();
-      const show = q === '' ? true : txt.startsWith(q); 
-      li.style.display = show ? '' : 'none';
-      if (show) visibleCount++;
-    });
-    
-    this.modelsList.scrollTop = 0;
-  }
-  */
-
   async searchManual() {
     const device = this.deviceInput.value.trim();
     
@@ -121,7 +82,7 @@ class TechGuideApp {
     this.showLoading();
 
     try {
-      const response = await fetch('/api/search-subtitles', {
+      const response = await fetch('/api/manual-generation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -129,7 +90,18 @@ class TechGuideApp {
         body: JSON.stringify({ device: device })
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        let data;
+        try {
+            data = await response.json(); 
+        } catch (e) {
+            console.error('JSON Parsing Error:', e);
+            this.showError('Received malformed response from server.');
+            return;
+        }
 
       if (data.success) {
         this.showResults(data.html);
@@ -138,11 +110,10 @@ class TechGuideApp {
       }
 
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('Search Network or unhandled error::', error);
       this.showError('Connection error. Please check your Internet connection.');
     }
   }
-
 
   showLoading() {
     this.hideAllSections();
@@ -150,21 +121,20 @@ class TechGuideApp {
     this.homeBtn.classList.remove('hidden');
   }
 
-  showResults(steps) {
+  showResults(htmlContent) {
     this.hideAllSections();
     this.resultsSection.classList.remove('hidden');
     this.homeBtn.classList.remove('hidden');
-    steps = JSON.parse(steps).steps
-    let nsect = document.createElement('section');
-    steps.forEach((st) => {
-	    let tit = document.createElement('h3');
-	    tit.innerText = st.title ;
-	    let desc = document.createElement('p');
-	    desc.innerText = st.description;
-	    nsect.appendChild(tit);
-	    nsect.appendChild(desc);
-    });
-    this.manualContainer.appendChild(nsect) ;
+    this.manualContainer.innerHTML = '';
+
+    if (typeof htmlContent === 'string' && htmlContent.length > 0) {
+      const formattedHtml = marked.parse(htmlContent);  
+      this.manualContainer.innerHTML = formattedHtml;
+    } else {
+        this.showError('Received empty content from the server.');
+        return;
+    }
+
   }
 
   showError(message) {
@@ -174,7 +144,7 @@ class TechGuideApp {
     this.errorMessage.textContent = message;
   }
 
-  /**async downloadPDF() {
+  async downloadPDF() {
     if (!this.currentDevice) {
       this.showError('No device selected for download');
       return;
@@ -193,7 +163,7 @@ class TechGuideApp {
       a.click();
       document.body.removeChild(a);
 
-      this.downloadBtn.textContent = '✓ Downloaded';
+      this.downloadBtn.textContent = 'Downloaded';
       setTimeout(() => {
         this.downloadBtn.textContent = originalText;
         this.downloadBtn.disabled = false;
@@ -204,7 +174,7 @@ class TechGuideApp {
       this.downloadBtn.textContent = 'Download PDF Manual';
       this.downloadBtn.disabled = false;
     }
-  }*/
+  }
 
   retrySearch() {
     if (this.currentDevice) {
@@ -215,7 +185,6 @@ class TechGuideApp {
     }
   }
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
   window.techGuideApp = new TechGuideApp();

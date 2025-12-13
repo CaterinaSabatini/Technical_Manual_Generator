@@ -244,52 +244,6 @@ body {
     box-shadow: 0 8px 32px rgba(0, 102, 204, 0.15);
 }
 
-.manual-container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.manual-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #f8f9fa;
-}
-
-.manual-header h2 {
-    color: var(--black);
-    font-size: 1.8rem;
-    margin-bottom: 0.5rem;
-}
-
-.manual-meta {
-    color: var(--dark-gray);
-    font-size: 0.9rem;
-}
-
-.manual-section {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: var(--light-gray);
-    border-radius: 10px;
-    border-left: 4px solid var(--primary-blue);
-}
-
-.manual-section h3 {
-    color: var(--black);
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-}
-
-.manual-section.warnings {
-    background: #fff5f5;
-    border-left-color: #dc2626;
-}
-
-.manual-section.warnings h3 {
-    color: #dc2626;
-}
-
 .tools-list,
 .warnings-list {
     list-style: none;
@@ -458,10 +412,6 @@ body {
         padding: 1.5rem;
     }
     
-    .manual-section {
-        padding: 1rem;
-    }
-    
     .steps-list li {
         padding-left: 2.5rem;
     }
@@ -540,31 +490,6 @@ body {
     transform: translateY(0);
 }
 
-/* Manual content styles */
-.manual-content {
-    width: 100%;
-}
-
-.manual-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid var(--light-blue);
-}
-
-.manual-header h2 {
-    color: var(--primary-blue);
-    margin-bottom: 1rem;
-}
-
-/* Manual footer */
-.manual-footer {
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-}
-
 .generated-time {
     color: var(--dark-gray);
     font-size: 0.8rem;
@@ -579,4 +504,72 @@ body {
 
 .warnings-section h3 {
     color: #dc2626 !important;
+}
+
+/* Manual Steps Styles */
+.manual-steps {
+    list-style: none;
+    padding-left: 0;
+    counter-reset: step-counter;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.manual-steps li {
+    counter-increment: step-counter;
+    background: var(--white);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--light-blue);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Number circle */
+.manual-steps li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: -2rem; /* Sposta il cerchio fuori dal bordo sinistro */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--light-blue);
+    color: var(--black);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+/* Step title */
+.manual-steps li .step-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+
+/* Step description */
+.manual-steps li .step-description {
+    font-size: 0.95rem;
+    color: var(--dark-gray);
+    line-height: 1.4;
+}
+
+/* Optional responsiveness */
+@media (max-width: 768px) {
+    .manual-steps li::before {
+        left: -1.5rem;
+        width: 1.7rem;
+        height: 1.7rem;
+        font-size: 0.85rem;
+    }
+    .manual-steps li {
+        padding: 0.8rem 1.2rem;
+    }
 }
