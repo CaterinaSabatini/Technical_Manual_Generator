@@ -57,7 +57,8 @@ def manual_generation_api():
         
         try:
             escaped_guide = json.dumps(html_guide, ensure_ascii=False)
-            safe_html_guide = escaped_guide[1:-1]
+            #safe_html_guide = escaped_guide[1:-1]
+            safe_html_guide = html_guide
             
         except Exception as e:
             print(f"ERRORE DI ESCAPING: {e}. Usando la stringa originale.")
