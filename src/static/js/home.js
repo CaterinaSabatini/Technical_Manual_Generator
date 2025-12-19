@@ -130,6 +130,7 @@ class TechGuideApp {
     if (typeof htmlContent === 'string' && htmlContent.length > 0) {
       const formattedHtml = marked.parse(htmlContent);  
       this.manualContainer.innerHTML = formattedHtml;
+      /*this.manualContainer.innerText = htmlContent;*/
     } else {
         this.showError('Received empty content from the server.');
         return;
