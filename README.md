@@ -13,6 +13,9 @@
 [![Python](https://img.shields.io/badge/Python-0376D6?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![VSCode](https://img.shields.io/badge/VSCode-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/)
+[![yt_dlp](https://img.shields.io/badge/yt_dlp-%23000000?style=for-the-badge&logoColor=white)](https://github.com/yt-dlp/yt-dlp)
+
+
 
 </div>
 
