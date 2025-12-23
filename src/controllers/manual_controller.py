@@ -52,6 +52,7 @@ def report_llm(data):
 
     # Assicurati che FILTER_PROMPT_TEMPLATE sia il template che chiede HTML/Markdown!
     prompt = f"""{FILTER_PROMPT_TEMPLATE} {subtitles_text}"""
+    prompt = ' '.join(prompt.split(' ')[:3000])
 
 
     payload = {
@@ -62,7 +63,7 @@ def report_llm(data):
     }
 
     try:
-        r = requests.post(OLLAMA_URL, json=payload, timeout=120)
+        r = requests.post(OLLAMA_URL, json=payload, timeout=1200)
         r.raise_for_status()
 
         response = r.json() 
