@@ -90,9 +90,9 @@ class TechGuideApp {
         body: JSON.stringify({ device: device })
       });
 
-      if (!response.ok) {
+      /* if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        } */
         
         let data;
         try {
