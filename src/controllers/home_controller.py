@@ -43,7 +43,7 @@ def manual_generation_api():
         if status != "ok" or not subtitles_data:
             return jsonify({
                 'success': False,
-                'error': 'No subtitles found for the specified device.'
+                'error': 'No subtitles found for the specified device. Try with a more specific model name.'
             }), 404
         
         html_guide = report_llm(subtitles_data) 
