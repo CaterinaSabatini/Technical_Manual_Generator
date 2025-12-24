@@ -40,7 +40,8 @@ def report_llm(data):
 
     subtitles_text = "\n".join(all_subs)
 
-    MAX_CHARS = 50000 
+    #MAX_CHARS = 50000 
+    MAX_CHARS = 20000
     if len(subtitles_text) > MAX_CHARS:
         subtitles_text = subtitles_text[:MAX_CHARS]
         print(f"DEBUG: Input testo troncato a {MAX_CHARS} caratteri.")
@@ -59,9 +60,43 @@ def report_llm(data):
         "model": OLLAMA_MODEL,
         "prompt": prompt,
         "stream": False,
+        "options": {
+            "num_ctx": 4096,
+            "temperature": 0.2
+        },
         "stop": ["```", "\n```", "\n\n\n"] 
     }
 
+    try:
+        r = requests.post(OLLAMA_URL, json=payload, timeout=1200)
+        r.raise_for_status()
+        response = r.json() 
+        manual_text = response.get("response", "")
+
+        if not manual_text:
+            return None
+
+        # Rimuovi i blocchi di codice se presenti
+        manual_text = re.sub(r'```(?:html)?', '', manual_text).replace('```', '').strip()
+
+        # Se Llama ha risposto con testo normale invece di HTML
+        if '<h1' not in manual_text.lower() and '<li' not in manual_text.lower():
+            # Forza una conversione minima o logga l'errore
+            print(f"ATTENZIONE: L'AI ha risposto senza HTML: {manual_text[:100]}")
+            # Opzionale: trasforma il testo in HTML semplice per non mandare nulla di vuoto
+            return f"<h1>Manuale Generato</h1><p>{manual_text}</p>"
+
+        # Isola l'HTML
+        start_index = manual_text.find('<')
+        if start_index != -1:
+            return manual_text[start_index:]
+        
+        return manual_text
+
+    except Exception as e:
+        print(f"Errore critico report_llm: {e}")
+        return None
+"""
     try:
         r = requests.post(OLLAMA_URL, json=payload, timeout=1200)
         r.raise_for_status()
@@ -76,7 +111,7 @@ def report_llm(data):
 
         if not manual_text or manual_text.strip() == "":
             print("DEBUG FALLITO: report_llm ha restituito output vuoto.")
-            return None 
+            return None  
         
         html_output = manual_text.strip()
         text_lines = html_output.split('\n')
@@ -102,6 +137,8 @@ def report_llm(data):
 
     except requests.exceptions.RequestException as e:
         print(f"Network error during Ollama call: {e}")
-        return None
+        return None """
+    
+
     
 

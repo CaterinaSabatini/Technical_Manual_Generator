@@ -94,14 +94,16 @@ class TechGuideApp {
             throw new Error(`HTTP error! status: ${response.status}`);
         } */
         
-        let data;
+        const data = await response.json();
+        console.log("Dati ricevuti dal server:", data);
+        /* let data;
         try {
             data = await response.json(); 
         } catch (e) {
             console.error('JSON Parsing Error:', e);
             this.showError('Received malformed response from server.');
             return;
-        }
+        } */
 
       if (data.success) {
         this.showResults(data.html);
@@ -111,7 +113,7 @@ class TechGuideApp {
 
     } catch (error) {
       console.error('Search Network or unhandled error::', error);
-      this.showError('Connection error. Please check your Internet connection.');
+      this.showError('Error fetching manual.' + error.message);
     }
   }
 
@@ -128,12 +130,12 @@ class TechGuideApp {
     this.manualContainer.innerHTML = '';
 
     if (typeof htmlContent === 'string' && htmlContent.length > 0) {
-      const formattedHtml = marked.parse(htmlContent);  
-      this.manualContainer.innerHTML = formattedHtml;
+      //const formattedHtml = marked.parse(htmlContent);  
+      this.manualContainer.innerHTML = htmlContent;
       /*this.manualContainer.innerText = htmlContent;*/
     } else {
         this.showError('Received empty content from the server.');
-        return;
+        //return;
     }
 
   }
