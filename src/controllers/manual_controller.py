@@ -1,6 +1,9 @@
 import os
-import re
 import requests
+from flask import render_template
+import json
+import re
+import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,8 +14,7 @@ PROMPT_TEMPLATE_MANUAL_PATH = os.getenv('PROMPT_MANUAL')
 
 
 if not PROMPT_TEMPLATE_MANUAL_PATH:
-    raise ValueError("The environment variable for LLM is not set.")
-
+    raise ValueError("Prompt template path not set in environment variables")
 
 try:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -25,13 +27,13 @@ except FileNotFoundError:
     raise FileNotFoundError(f"Error: Could not find file at path. Check your settings in .env.")
 
 """
-Generate a step-by-step disassembly manual in HTML format for the device name specified by the user.
+Generate a disassembly manual in HTML format for the device name specified by the user.
 
 @param data: list of dictionaries containing video data
 @param device_name: name of the device being disassembled
 @return: a string of HTML-formatted document
 """
-def report_llm(data):
+def report_llm(data, device_name):
 
     all_subs = []
     for video in data:
@@ -39,19 +41,11 @@ def report_llm(data):
             all_subs.append(sub["s"])
 
     subtitles_text = "\n".join(all_subs)
-
-    #MAX_CHARS = 50000 
+ 
     MAX_CHARS = 20000
     if len(subtitles_text) > MAX_CHARS:
         subtitles_text = subtitles_text[:MAX_CHARS]
-        print(f"DEBUG: Input testo troncato a {MAX_CHARS} caratteri.")
 
-    print("-" * 50)
-    print(f"DEBUG: Lunghezza finale subtitles_text: {len(subtitles_text)}")
-    print(f"DEBUG: Primi 500 caratteri di subtitles_text:\n{subtitles_text[:500]}")
-    print("-" * 50)
-
-    # Assicurati che FILTER_PROMPT_TEMPLATE sia il template che chiede HTML/Markdown!
     prompt = f"""{FILTER_PROMPT_TEMPLATE} {subtitles_text}"""
     prompt = ' '.join(prompt.split(' ')[:3000])
 
@@ -74,70 +68,34 @@ def report_llm(data):
         manual_text = response.get("response", "")
 
         if not manual_text:
-            return None
+            return "error", None
 
-        # Rimuovi i blocchi di codice se presenti
-        manual_text = re.sub(r'```(?:html)?', '', manual_text).replace('```', '').strip()
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        manuals_dir = os.path.join(base_dir, '..', 'device_manuals')
 
-        # Se Llama ha risposto con testo normale invece di HTML
-        if '<h1' not in manual_text.lower() and '<li' not in manual_text.lower():
-            # Forza una conversione minima o logga l'errore
-            print(f"ATTENZIONE: L'AI ha risposto senza HTML: {manual_text[:100]}")
-            # Opzionale: trasforma il testo in HTML semplice per non mandare nulla di vuoto
-            return f"<h1>Manuale Generato</h1><p>{manual_text}</p>"
+        if not os.path.exists(manuals_dir):
+            os.makedirs(manuals_dir)
 
-        # Isola l'HTML
-        start_index = manual_text.find('<')
-        if start_index != -1:
-            return manual_text[start_index:]
-        
-        return manual_text
+        timestamp = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+        safe_device_name = re.sub(r'[^a-zA-Z0-9_\-]', '_', device_name.lower())
 
-    except Exception as e:
-        print(f"Errore critico report_llm: {e}")
-        return None
-"""
-    try:
-        r = requests.post(OLLAMA_URL, json=payload, timeout=1200)
-        r.raise_for_status()
+        file_name = f"{safe_device_name}_{timestamp}.json"
+        file_path = os.path.join(manuals_dir, file_name)
 
-        response = r.json() 
-        manual_text = response.get("response", "")
+        manual_json = {
+            "device": device_name,
+            "manual_text": manual_text,
+            "timestamp": timestamp
+        }
 
-        print("-" * 50)
-        print("DEBUG: Output Grezzo LLM (manual_text):")
-        print(manual_text)
-        print("-" * 50)
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(manual_json, f, ensure_ascii=False, indent=4)
 
-        if not manual_text or manual_text.strip() == "":
-            print("DEBUG FALLITO: report_llm ha restituito output vuoto.")
-            return None  
-        
-        html_output = manual_text.strip()
-        text_lines = html_output.split('\n')
-        start_line_index = -1
+        return file_name
 
-        for i, line in enumerate(text_lines):
-            line_stripped = line.strip()
-            if re.match(r'^\d+\.', line_stripped):
-                start_line_index = i
-                break
-            if re.match(r'^\*\*[^:]+\*\*', line_stripped):
-                start_line_index = i
-                break
+    except Exception:
+        return "error", None
 
-        if start_line_index != -1:
-            cleaned_manual_text = '\n'.join(text_lines[start_line_index:])
-            print("DEBUG SUCCESSO: Markdown strutturato isolato.")
-        else:
-            cleaned_manual_text = manual_text.strip()
-            print("DEBUG ATTENZIONE: Nessuna struttura Markdown trovata. Usando l'output completo.")
-            
-        return cleaned_manual_text
-
-    except requests.exceptions.RequestException as e:
-        print(f"Network error during Ollama call: {e}")
-        return None """
     
 
     

@@ -5,10 +5,9 @@ import re
 import tempfile
 import sqlite3
 import datetime
-from flask import jsonify
 from dotenv import load_dotenv
 from .video_validator_controller import is_valid_video, filter_llm
-import requests
+
 
 load_dotenv()
 
@@ -23,7 +22,6 @@ KEYWORDS = [
 
 """
 Mapping device research string to possible model names from a local database
-
 @param research: search term for finding relevant models
 @return: list of model names
 """
@@ -31,9 +29,7 @@ def map_device_to_models(research):
     
     db_path = 'devices_database/device.sqlite'
     models = []
-    
     lower_research = research.strip().lower() 
-
     word_count = len(lower_research.split())
 
     if len(lower_research) < 4 or word_count < 3:
@@ -84,16 +80,6 @@ def map_device_to_models(research):
     return models
 
 """
-Check if the video info contains any of the specified keywords in title or description
-
-@param info: dictionary containing video information
-@return: True if any keyword is found, False otherwise
-
-def contains_keywords(info):
-    combined_text = info.get('title', '') 
-    return any(k.lower() in combined_text for k in KEYWORDS)
-"""
-"""
 Get subtitles from YouTube videos based on a search term
 
 @param research: search term for finding relevant videos
@@ -104,11 +90,7 @@ def get_subtitles(research):
     mapped_models = map_device_to_models(research)
 
     if not mapped_models:
-        return jsonify({
-            'success': False,
-            'status': 'warning',
-            'error': f'No models found for device "{research}". Please provide a more specific device name.'
-        }), 400
+        return "error", None
         
 
     models_query_part = ' | '.join(mapped_models)
@@ -148,11 +130,7 @@ def get_subtitles(research):
                 chosen_videos.append(entry)
             
             if len(chosen_videos) == 0:
-                return jsonify({
-                    'success': False,
-                    'status': 'warning',
-                    'error': f'The research for "{research}" did not return any valid videos. Please try with a different device name.'
-                }), 404
+                return "error", None
 
         
         llm_context_models = ' | '.join(mapped_models)
@@ -214,11 +192,7 @@ def get_subtitles(research):
             })
 
         if valid_videos is None or len(valid_videos) == 0:
-            return jsonify({
-                'success': False,
-                'status': 'warning',
-                'error': f'The research for "{research}" did not produce any results. Please try with a different device name.'
-            }), 404
+            return "error", None
             
         output_dir = "subtitles"
         os.makedirs(output_dir, exist_ok=True)

@@ -7,8 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TechGuide - Technical Manual Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/marked.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/home.js') }}" defer></script>
 </head>
 <body>
     <div class="container">
@@ -41,16 +40,6 @@
                 <div class="loading-container">
                     <div class="spinner"></div>
                     <p class="loading-text">Searching for manual...</p>
-                </div>
-            </section>
-
-            <section id="resultsSection" class="results-section hidden">
-                <div class="manual-container" id="manualContainer">
-                </div>
-                <div class="action-buttons">
-                    <button id="downloadBtn" class="download-btn">
-                        Download PDF Manual
-                    </button>
                 </div>
             </section>
 
