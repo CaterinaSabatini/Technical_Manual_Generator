@@ -30,7 +30,7 @@ try:
         FILTER_PROMPT_TEMPLATE = f.read().strip()
     
 except FileNotFoundError:
-    raise FileNotFoundError(f"Error: Could not find file at path. Check your settings in .env.")
+    raise FileNotFoundError(f"Error: Could not find file at path")
 
 
 """
@@ -100,16 +100,13 @@ def filter_llm(videos, count, model):
         m = re.search(r'\{.*\}', raw, re.DOTALL)
         
         if not m:
-            print(f"Warning: No JSON block found in LLM response.")
             return []
         
         resp = json.loads(m.group(0))
         
-    except requests.exceptions.RequestException as e:
-        print(f"Network error during Ollama call.")
+    except requests.exceptions.RequestException:
         return []
-    except json.JSONDecodeError as e:
-        print(f"JSON parsing error from Ollama response.")
+    except json.JSONDecodeError:
         return []
     
     ret = []
