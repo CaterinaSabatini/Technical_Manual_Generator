@@ -27,47 +27,74 @@ class TechGuideApp {
     
     this.currentDevice = '';
     
-    
     this.init();
+
   }
 
   init() {
     this.addEventListeners();
-    this.showHomeScreen();
-    this.deviceInput.focus();
+    // Only call showHomeScreen if we're on home page (has deviceInput)
+    if (this.deviceInput) {
+      this.showHomeScreen();
+      this.deviceInput.focus();
+    }
   }
 
   addEventListeners() {
     
-    this.homeBtn.addEventListener('click', () => this.showHomeScreen());
-    this.downloadBtn.addEventListener('click', () => this.downloadPDF());
-    this.goBackBtn.addEventListener('click', () => this.showHomeScreen());
-    this.searchBtn.addEventListener('click', () => this.searchManual());
+    if (this.homeBtn) {
+      this.homeBtn.addEventListener('click', () => this.showHomeScreen());
+    }
+    if (this.downloadBtn) {
+      this.downloadBtn.addEventListener('click', () => this.downloadPDF());
+    }
+    if (this.goBackBtn) {
+      this.goBackBtn.addEventListener('click', () => this.showHomeScreen());
+    }
+    if (this.searchBtn) {
+      this.searchBtn.addEventListener('click', () => this.searchManual());
+    }
 
     
-    this.deviceInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        this.searchManual();
-      }
-    });
+    if (this.deviceInput) {
+      this.deviceInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.searchManual();
+        }
+      });
+    }
 
   }
 
   showHomeScreen() {
     this.hideAllSections();
-    this.searchSection.classList.remove('hidden');
-    this.homeBtn.classList.add('hidden');
-    this.deviceInput.value = '';
-    this.deviceInput.focus();
+    if (this.searchSection) {
+      this.searchSection.classList.remove('hidden');
+    }
+    if (this.homeBtn) {
+      this.homeBtn.classList.add('hidden');
+    }
+    if (this.deviceInput) {
+      this.deviceInput.value = '';
+      this.deviceInput.focus();
+    }
     this.currentDevice = '';
   }
 
   hideAllSections() {
-    this.searchSection.classList.add('hidden');
-    this.loadingSection.classList.add('hidden');
-    this.resultsSection.classList.add('hidden');
-    this.errorSection.classList.add('hidden');
+    if (this.searchSection) {
+      this.searchSection.classList.add('hidden');
+    }
+    if (this.loadingSection) {
+      this.loadingSection.classList.add('hidden');
+    }
+    if (this.resultsSection) {
+      this.resultsSection.classList.add('hidden');
+    }
+    if (this.errorSection) {
+      this.errorSection.classList.add('hidden');
+    }
   }
 
   async searchManual() {
@@ -90,30 +117,36 @@ class TechGuideApp {
         body: JSON.stringify({ device: device })
       });
 
-      /* if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        } */
-        
         const data = await response.json();
-        console.log("Dati ricevuti dal server:", data);
-        /* let data;
-        try {
-            data = await response.json(); 
-        } catch (e) {
-            console.error('JSON Parsing Error:', e);
-            this.showError('Received malformed response from server.');
-            return;
-        } */
 
-      if (data.success) {
-        this.showResults(data.html);
-      } else {
+        if (!response.ok) {
+          this.showError(data.error || `Server Error: ${response.status}`);
+          return;
+      } 
+
+      if (data.success && data.manual_id) {
+        // Verify the manual page exists before redirecting
+        const manualUrl = `/api/manual/${encodeURIComponent(data.manual_id.split('/').pop())}`;
+        
+        try {
+          const checkResponse = await fetch(manualUrl, { method: 'HEAD' });
+          if (checkResponse.ok) {
+            window.location.href = manualUrl;
+          } else {
+            this.showError('Manual was generated but could not be loaded. Please try again.');
+          }
+        } catch (err) {
+          console.error('Error checking manual:', err);
+          this.showError('Unable to verify manual. Please try again.');
+        }
+      }
+      else {
         this.showError(data.error || 'Manual not found for this device');
       }
 
     } catch (error) {
       console.error('Search Network or unhandled error::', error);
-      this.showError('Error fetching manual.' + error.message);
+      this.showError('Error fetching manual. ' + error.message);
     }
   }
 
@@ -123,22 +156,6 @@ class TechGuideApp {
     this.homeBtn.classList.remove('hidden');
   }
 
-  showResults(htmlContent) {
-    this.hideAllSections();
-    this.resultsSection.classList.remove('hidden');
-    this.homeBtn.classList.remove('hidden');
-    this.manualContainer.innerHTML = '';
-
-    if (typeof htmlContent === 'string' && htmlContent.length > 0) {
-      //const formattedHtml = marked.parse(htmlContent);  
-      this.manualContainer.innerHTML = htmlContent;
-      /*this.manualContainer.innerText = htmlContent;*/
-    } else {
-        this.showError('Received empty content from the server.');
-        //return;
-    }
-
-  }
 
   showError(message) {
     this.hideAllSections();
@@ -148,34 +165,46 @@ class TechGuideApp {
   }
 
   async downloadPDF() {
-    if (!this.currentDevice) {
-      this.showError('No device selected for download');
-      return;
-    }
+    console.log('downloadPDF called');
     try {
-      const originalText = this.downloadBtn.textContent;
-      this.downloadBtn.textContent = 'Generating PDF...';
-      this.downloadBtn.disabled = true;
+      if (!this.manualContainer) {
+        console.error('Manual container not found');
+        alert('Unable to find manual content');
+        return;
+      }
 
-      const downloadUrl = `/api/download-pdf?device=${encodeURIComponent(this.currentDevice)}`;
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = `${this.currentDevice}_manual.pdf`;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      if (this.downloadBtn) {
+        const originalText = this.downloadBtn.textContent;
+        this.downloadBtn.textContent = 'Generating PDF...';
+        this.downloadBtn.disabled = true;
 
-      this.downloadBtn.textContent = 'Downloaded';
-      setTimeout(() => {
-        this.downloadBtn.textContent = originalText;
-        this.downloadBtn.disabled = false;
-      }, 2000);
+        // Get device name from the page
+        const deviceTitle = document.querySelector('h2')?.textContent || 'manual';
+        const filename = deviceTitle.replace(/[^a-zA-Z0-9]/g, '_') + '.pdf';
+
+        const opt = {
+          margin: 10,
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        await html2pdf().set(opt).from(this.manualContainer).save();
+
+        this.downloadBtn.textContent = 'Downloaded!';
+        setTimeout(() => {
+          this.downloadBtn.textContent = originalText;
+          this.downloadBtn.disabled = false;
+        }, 2000);
+      }
     } catch (error) {
-      console.error('Download error:', error);
-      alert(`PDF download failed: ${error.message}`);
-      this.downloadBtn.textContent = 'Download PDF Manual';
-      this.downloadBtn.disabled = false;
+      console.error('PDF generation error:', error);
+      alert('PDF generation failed: ' + error.message);
+      if (this.downloadBtn) {
+        this.downloadBtn.textContent = 'Download PDF Manual';
+        this.downloadBtn.disabled = false;
+      }
     }
   }
 
