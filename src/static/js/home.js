@@ -38,6 +38,37 @@ class TechGuideApp {
       this.showHomeScreen();
       this.deviceInput.focus();
     }
+    
+    // Se siamo sulla pagina del manuale, formatta il contenuto
+    if (document.querySelector('.manual-content-body')) {
+      this.formatManualContent();
+    }
+  }
+
+  formatManualContent() {
+    // Cerchiamo il div che contiene il testo generato da Jinja
+    const contentBody = document.querySelector('.manual-content-body');
+    if (!contentBody) return;
+
+    let rawText = contentBody.innerHTML;
+
+    // 1. TRASFORMAZIONE TITOLI SEZIONE (**Titolo**)
+    // Cerca i doppi asterischi, mette in grassetto, aggiunge un'icona e va a capo
+    rawText = rawText.replace(/\*\*(.*?)\*\*/g, '<br><h3 class="manual-section-title"> • $1</h3>');
+
+    // 2. TRASFORMAZIONE PUNTI ELENCO (* Elemento)
+    // Cerca l'asterisco singolo e lo trasforma in un elemento di lista stilizzato
+    rawText = rawText.replace(/^\s*\*\s+(.+)$/gm, '<li class="manual-item">$1</li>');
+
+    // 3. AVVOLGIMENTO LISTE
+    // Se abbiamo creato dei <li>, dobbiamo assicurarci che siano dentro un <ul>
+    if (rawText.includes('<li class="manual-item">')) {
+        // Questa regex raggruppa righe consecutive di <li> in un unico <ul>
+        rawText = rawText.replace(/(<li class="manual-item">.*?<\/li>(?:\s*<li class="manual-item">.*?<\/li>)*)/gs, '<ul class="manual-list">$1</ul>');
+    }
+
+    // Reinseriamo l'HTML formattato nel contenitore
+    contentBody.innerHTML = rawText;
   }
 
   addEventListeners() {
@@ -178,6 +209,40 @@ class TechGuideApp {
         this.downloadBtn.textContent = 'Generating PDF...';
         this.downloadBtn.disabled = true;
 
+        // Salva lo scroll corrente
+        const originalScrollY = window.scrollY;
+        
+        // Scorri all'inizio della pagina
+        window.scrollTo(0, 0);
+
+        // Trova tutti gli elementi che potrebbero avere overflow o altezza limitata
+        const elementsToFix = [
+          this.manualContainer,
+          this.manualContainer.parentElement,
+          document.querySelector('.manual-content-body'),
+          document.body
+        ].filter(el => el !== null);
+
+        // Salva gli stili originali di tutti gli elementi
+        const originalStyles = elementsToFix.map(el => ({
+          element: el,
+          overflow: el.style.overflow,
+          overflowY: el.style.overflowY,
+          maxHeight: el.style.maxHeight,
+          height: el.style.height
+        }));
+
+        // Rimuovi tutte le limitazioni
+        elementsToFix.forEach(el => {
+          el.style.overflow = 'visible';
+          el.style.overflowY = 'visible';
+          el.style.maxHeight = 'none';
+          el.style.height = 'auto';
+        });
+
+        // Aspetta un momento per assicurarsi che il layout sia aggiornato
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         // Get device name from the page
         const deviceTitle = document.querySelector('h2')?.textContent || 'manual';
         const filename = deviceTitle.replace(/[^a-zA-Z0-9]/g, '_') + '.pdf';
@@ -186,11 +251,35 @@ class TechGuideApp {
           margin: 10,
           filename: filename,
           image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            allowTaint: true
+          },
+          jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+          },
+          pagebreak: { 
+            mode: ['avoid-all', 'css', 'legacy'],
+            before: '.manual-section-title'
+          }
         };
 
         await html2pdf().set(opt).from(this.manualContainer).save();
+
+        // Ripristina tutti gli stili originali
+        originalStyles.forEach(({ element, overflow, overflowY, maxHeight, height }) => {
+          element.style.overflow = overflow;
+          element.style.overflowY = overflowY;
+          element.style.maxHeight = maxHeight;
+          element.style.height = height;
+        });
+
+        // Ripristina lo scroll originale
+        window.scrollTo(0, originalScrollY);
 
         this.downloadBtn.textContent = 'Downloaded!';
         setTimeout(() => {
