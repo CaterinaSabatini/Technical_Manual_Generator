@@ -505,6 +505,7 @@ body {
 /* Manual content styling */
 
 .manual-content-body {
+    white-space: pre-line; /* Mantiene gli a capo dal testo originale */
     text-align: left;
     color: var(--dark-gray);
 }
@@ -518,4 +519,38 @@ body {
 
 .manual-content-body p {
     margin-bottom: 1rem;
+}
+
+/* Titoli delle sezioni (ex **Sezione**) */
+.manual-section-title {
+    display: block;
+    font-size: 1.25rem;
+    color: #2c3e50;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+/* Contenitore lista */
+.manual-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 15px;
+}
+
+/* Singolo elemento (ex * Elemento) */
+.manual-item {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+/* Il "punto elenco davanti" richiesto */
+.manual-item::before {
+    content: "•";
+    position: absolute;
+    left: 10px;
+    color: #3498db;
+    font-weight: bold;
 }
