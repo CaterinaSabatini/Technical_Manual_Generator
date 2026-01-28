@@ -1,0 +1,34 @@
+{
+    "devices": [
+        {
+            "display_name": "MacBook Pro 14-inch M3",
+            "file_name": "MacBook_Pro_14_inch_M3.json",
+            "category": "laptop",
+            "manufacturer": "Apple"
+        },
+        {
+            "display_name": "Dell XPS 15 9530", 
+            "file_name": "Dell_XPS_15_9530.json",
+            "category": "laptop",
+            "manufacturer": "Dell"
+        },
+        {
+            "display_name": "ThinkPad X1 Carbon Gen 11",
+            "file_name": "ThinkPad_X1_Carbon_Gen_11.json", 
+            "category": "laptop",
+            "manufacturer": "Lenovo"
+        },
+        {
+            "display_name": "Custom Gaming PC Build",
+            "file_name": "Custom_Gaming_PC_Build.json",
+            "category": "desktop", 
+            "manufacturer": "Custom Build"
+        },
+        {
+            "display_name": "HP EliteDesk 800 G9",
+            "file_name": "HP_EliteDesk_800_G9.json",
+            "category": "desktop",
+            "manufacturer": "HP"
+        }
+    ]
+}
