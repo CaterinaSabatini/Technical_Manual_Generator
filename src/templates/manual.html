@@ -22,18 +22,13 @@
         <main class="main-content">
             <section id="resultsSection" class="results-section">
                 <div class="manual-container" id="manualContainer">
-                    <h2 style="text-align: center;">Disassembly manual for {{ device_name }}</h2>
+                    <h2 style="text-align: center;">Disassembly manual</h2>
                     <div class="manual-content-body">
                     {{ manual_content|safe }}
                 </div>
                 <div class="generated-time">
                     Generated on {{ timestamp }} by TechGuide
                 </div>
-                </div>
-                <div class="action-buttons">
-                    <button id="downloadBtn" class="download-btn">
-                        Download PDF Manual
-                    </button>
                 </div>
             </section>
         </main>

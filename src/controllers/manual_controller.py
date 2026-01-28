@@ -24,16 +24,17 @@ try:
         FILTER_PROMPT_TEMPLATE = f.read().strip()
     
 except FileNotFoundError:
-    raise FileNotFoundError(f"Error: Could not find file at path. Check your settings in .env.")
+    raise FileNotFoundError(f"Error: Could not find file at path.")
 
 """
-Generate a disassembly manual in HTML format for the device name specified by the user.
-
-@param data: list of dictionaries containing video data
-@param device_name: name of the device being disassembled
-@return: a string of HTML-formatted document
+Generate device manual using LLM based on subtitles data.
+@param data: List of videos with subtitles data.
+@param device_name: Name of the device for which manual is generated.
+@return: Filename of the saved manual JSON or "error" in case of failure.
 """
 def report_llm(data, device_name):
+
+    max_chars: int = 20000
 
     all_subs = []
     for video in data:
@@ -42,9 +43,8 @@ def report_llm(data, device_name):
 
     subtitles_text = "\n".join(all_subs)
  
-    MAX_CHARS = 20000
-    if len(subtitles_text) > MAX_CHARS:
-        subtitles_text = subtitles_text[:MAX_CHARS]
+    if len(subtitles_text) > max_chars:
+        subtitles_text = subtitles_text[:max_chars]
 
     prompt = f"""{FILTER_PROMPT_TEMPLATE} {subtitles_text}"""
     prompt = ' '.join(prompt.split(' ')[:3000])

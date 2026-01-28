@@ -16,18 +16,22 @@ MAX_SEARCH = int(os.getenv('MAX_SEARCH'))
 OLLAMA_URL = os.getenv('OLLAMA_URL')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, '..', 'devices_database', 'device.sqlite')
+
+# Keywords to refine YouTube search for relevant videos
 KEYWORDS = [
     "teardown", "disassembly", "repair"
 ]
 
 """
-Mapping device research string to possible model names from a local database
-@param research: search term for finding relevant models
-@return: list of model names
+Map user research term to device models in the database.
+@param research: user input search term
+@return: list of matched device models
 """
 def map_device_to_models(research):
     
-    db_path = 'devices_database/device.sqlite'
+    
     models = []
     lower_research = research.strip().lower() 
     word_count = len(lower_research.split())
@@ -36,7 +40,7 @@ def map_device_to_models(research):
             return []
     
     try:
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         
         cursor.execute(
@@ -80,10 +84,9 @@ def map_device_to_models(research):
     return models
 
 """
-Get subtitles from YouTube videos based on a search term
-
-@param research: search term for finding relevant videos
-@return: tuple (status, subtitles data or error message)
+Fetch subtitles for videos related to the research term.
+@param research: user input search term
+@return: status and list of videos with subtitles data
 """
 def get_subtitles(research):
 
