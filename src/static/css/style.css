@@ -1,4 +1,4 @@
-/* TechGuide - Home Page Styles */
+/* TechGuide - Web Page Styles */
 
 :root {
     --primary-blue: #0066cc;
@@ -102,17 +102,16 @@ body {
     font-style: italic;
 }
 
-/* Aggiornamento: Input Group per allineare campo e pulsante */
+
 .input-group {
     display: flex;
     gap: 1rem;
     margin-bottom: 0.74rem;
-    /* Rimosso flex-wrap per mantenere input e pulsante affiancati su schermi larghi */
 }
 
 .device-input {
-    flex: 1; /* Permette all'input di occupare lo spazio rimanente */
-    min-width: 250px; /* Ridotto il min-width per una migliore gestione dello spazio */
+    flex: 1; 
+    min-width: 250px; 
     padding: 1rem 1.5rem;
     border: 2px solid var(--border-color);
     border-radius: 50px;
@@ -141,9 +140,8 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    min-width: 150px; /* Leggermente ridotto per una migliore reattività */
+    min-width: 150px; 
     justify-content: center;
-    /* Aggiunto per allineamento nel flexbox */
     align-self: flex-start;
 }
 
@@ -158,10 +156,6 @@ body {
     transform: none;
 }
 
-/* Stili per la lista dei modelli rimossi in quanto non più necessaria nel DOM */
-/* Sezione #models-list completamente rimossa */
-
-/* Suggestions */
 .suggestions {
     text-align: center;
 }
@@ -244,68 +238,6 @@ body {
     box-shadow: 0 8px 32px rgba(0, 102, 204, 0.15);
 }
 
-.tools-list,
-.warnings-list {
-    list-style: none;
-    padding-left: 0;
-}
-
-.tools-list li,
-.warnings-list li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-    position: relative;
-    padding-left: 2rem;
-}
-
-.tools-list li:before {
-    content: "🔧";
-    position: absolute;
-    left: 0;
-}
-
-.warnings-list li:before {
-    content: "⚠️";
-    position: absolute;
-    left: 0;
-}
-
-.steps-list {
-    counter-reset: step-counter;
-    list-style: none;
-    padding-left: 0;
-}
-
-.steps-list li {
-    counter-increment: step-counter;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    background: var(--white);
-    border-radius: 8px;
-    border-left: 4px solid var(--light-blue);
-    position: relative;
-    padding-left: 3rem;
-}
-
-.steps-list li:before {
-    content: counter(step-counter);
-    position: absolute;
-    left: 1rem;
-    top: 1rem;
-    background: var(--light-blue);
-    color: var(--white);
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-
-
 /* Error section */
 .error-section {
     background: var(--white);
@@ -322,8 +254,6 @@ body {
     margin: 0 auto;
 }
 
-
-
 .error-container h3 {
     color: #000000;
     margin-bottom: 1rem;
@@ -334,30 +264,10 @@ body {
     margin-bottom: 2rem;
 }
 
-.retry-btn {
-    background: #dc2626;
-    color: var(--white);
-    border: none;
-    padding: 0.8rem 2rem;
-    border-radius: 25px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.retry-btn:hover {
-    background: #b91c1c;
-    transform: translateY(-2px);
-}
-
-
-
-/* Utility classes */
 .hidden {
     display: none !important;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
     .container {
         padding: 1rem;
@@ -375,9 +285,8 @@ body {
         font-size: 1rem;
     }
     
-    /* Nuovo stile per il gruppo di input su schermi più piccoli */
     .input-group {
-        flex-direction: column; /* Impila input e pulsante verticalmente */
+        flex-direction: column;
         gap: 0.75rem;
     }
     
@@ -386,7 +295,7 @@ body {
     }
     
     .search-btn {
-        min-width: 100%; /* Il pulsante occupa l'intera larghezza */
+        min-width: 100%; 
         justify-content: center;
     }
     
@@ -412,17 +321,9 @@ body {
         padding: 1.5rem;
     }
     
-    .steps-list li {
-        padding-left: 2.5rem;
-    }
-    
-    .tools-list li,
-    .warnings-list li {
-        padding-left: 1.5rem;
-    }
+
 }
 
-/* Device info section */
 .device-info {
     display: flex;
     gap: 1.5rem;
@@ -439,9 +340,9 @@ body {
     font-weight: 600;
 }
 
-/* Home button and Download button */
+/* Home button and Go Back button */
 .home-btn,
-.download-btn {
+.go-back-btn {
     background: var(--white);
     color: var(--primary-blue);
     border: 2px solid var(--primary-blue);
@@ -460,7 +361,7 @@ body {
     z-index: 10;
 }
 
-.download-btn {
+.go-back-btn {
     display: inline-block;
 }
 
@@ -474,7 +375,7 @@ body {
 }
 
 .home-btn:hover,
-.download-btn:hover {
+.go-back-btn:hover {
     background: var(--primary-blue);
     color: var(--white);
     transform: translateY(-2px);
@@ -482,7 +383,7 @@ body {
 }
 
 .home-btn:active,
-.download-btn:active {
+.go-back-btn:active {
     transform: translateY(0);
 }
 
@@ -492,18 +393,8 @@ body {
     font-style: italic;
 }
 
-/* Warnings section specific styling */
-.warnings-section {
-    background: #fff5f5 !important;
-    border-left-color: #dc2626 !important;
-}
-
-.warnings-section h3 {
-    color: #dc2626 !important;
-}
 
 /* Manual content styling */
-
 .manual-content-body {
     text-align: left;
     color: var(--dark-gray);

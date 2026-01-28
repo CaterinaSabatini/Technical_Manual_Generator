@@ -10,7 +10,7 @@ OLLAMA_PATH = os.getenv('OLLAMA_PATH')
 OLLAMA_TEST = os.getenv('OLLAMA_TEST')
 MAX_RETRIES = int(os.getenv('MAX_RETRIES'))
 
-ollama_process = None
+""" ollama_process = None
 
 def ensure_ollama_up():
     global ollama_process
@@ -66,8 +66,54 @@ def terminate_ollama():
         except subprocess.TimeoutExpired:
             print("Ollama process did not terminate in time. Killing it.")
             ollama_process.kill()
-        ollama_process = None
+        ollama_process = None """
 
-  
+def start_ollama(ollama_path, healthcheck_url, max_retries, retry_delay, request_timeout):
+    process = subprocess.Popen(
+        [ollama_path, "serve"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+    for attempt in range(1, max_retries + 1):
+
+        # Check if the process crashed
+        if process.poll() is not None:
+            raise RuntimeError("Ollama process exited during startup")
+
+        try:
+            response = requests.get(
+                healthcheck_url,
+                timeout=request_timeout,
+            )
+            response.raise_for_status()
+            print(f"Ollama is ready (attempt {attempt}/{max_retries})", flush=True)
+            return process
+
+        except requests.RequestException as e:
+            print(f"Attempt {attempt}/{max_retries}: Waiting for Ollama... ({type(e).__name__})", flush=True)
+            time.sleep(retry_delay)
+
+    raise TimeoutError("Ollama did not become available in time")
+
+def stop_ollama(process):
+    """
+    Terminates the managed Ollama process.
+    """
+    if process is None:
+        return
+
+    if process.poll() is not None:
+        print("Ollama process terminated.", flush=True)
+        return
+
+    process.terminate()
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+        print("Ollama process killed.", flush=True)
+
 
      

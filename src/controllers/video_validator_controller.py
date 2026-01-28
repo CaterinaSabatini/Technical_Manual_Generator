@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-#Ollama environment variables
+
 OLLAMA_URL = os.getenv('OLLAMA_URL')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
 PROMPT_TEMPLATE_SUBTITLES_PATH = os.getenv('PROMPT_SUBTITLES')
@@ -19,8 +19,7 @@ MIN_LIKE_RATIO = float(os.getenv('MIN_LIKE_RATIO'))
 
 
 if not PROMPT_TEMPLATE_SUBTITLES_PATH:
-    raise ValueError("The environment variable for LLM is not set.")
-
+    raise ValueError("Prompt template path not set in environment variables")
 
 try:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -34,9 +33,9 @@ except FileNotFoundError:
 
 
 """
-Check if the video meets all the criteria for selection
-@param entry: dictionary containing video information
-@return: True if the video is valid, False otherwise
+Validate if a video entry meets the criteria
+@param entry: video metadata dictionary
+@return: True if valid, False otherwise
 """
 def is_valid_video(entry):
     views = entry.get('view_count', 0)
@@ -55,11 +54,11 @@ def is_valid_video(entry):
     )
 
 """
-Select the most relevant videos from the list provided
-@param videos: list of video ids and titles
-@param count: number of videos to choose
-@param model: device model to search
-@return: a subset of videos of length $count
+Filter videos using LLM to select the most relevant ones
+@param videos: list of video metadata dictionaries
+@param count: number of videos to select
+@param model: device model name
+@return: list of selected video metadata dictionaries
 """
 def filter_llm(videos, count, model):
     
@@ -68,7 +67,7 @@ def filter_llm(videos, count, model):
 
     prompt = (
         FILTER_PROMPT_TEMPLATE
-        .replace("DEVICE_MODEL_PLACEHOLDER", model)
+        .replace("CONTEXT_MODELS_PLACEHOLDER", model)
         .replace("NUMBER_TO_CHOOSE", str(count))
         .replace("VIDEO_LIST_PLACEHOLDER", l_video)
     )
