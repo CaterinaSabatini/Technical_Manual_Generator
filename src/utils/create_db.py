@@ -3,15 +3,14 @@ import os
 import sys
 
 """
-Combines model fields into the full device name.
-
-@param prod: Product name
-@param fam: Family name
-@param subfam: Subfamily name
-@param showsubfam: Flag indicating whether to show subfamily
-@param model: Model name
-@param submodel: Submodel name
-@return: Formatted device name as a string
+Formats device name components into a single string.
+@param prod: product name
+@param fam: family name
+@param subfam: subfamily name
+@param showsubfam: flag to include subfamily
+@param model: model name
+@param submodel: submodel name
+@return: formatted device name string
 """
 def format_name(prod, fam, subfam, showsubfam, model, submodel):
 
@@ -30,10 +29,10 @@ def format_name(prod, fam, subfam, showsubfam, model, submodel):
 
 
 """
-Extracts, formats, sorts, and saves unique device names to a new SQLite database.
-
-@param input_db_path: Path to the source database
-@param output_db_path: Path to the destination database
+Creates a new SQLite database with device names sorted alphabetically.
+@param input_db_path: path to the input database file
+@param output_db_path: path to the output database file
+@return: None
 """
 def create_new_sorted_device_database(input_db_path="devices_database/modelli.sqlite", 
                                      output_db_path="devices_database/device.sqlite"): 
@@ -101,7 +100,7 @@ def create_new_sorted_device_database(input_db_path="devices_database/modelli.sq
     db_input.close()
     db_output.close()
     
-    print("Operation completed. Names saved in alphabetical order to devices_database/device.sqlite.")
+    print("Operation completed successfully.")
 
 if __name__ == "__main__":
     os.makedirs("devices_database", exist_ok=True)
