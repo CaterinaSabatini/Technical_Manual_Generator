@@ -1,0 +1,38 @@
+{
+    "device_name": "HP EliteDesk 800 G9",
+    "category": "desktop",
+    "manufacturer": "HP",
+    "difficulty": "Beginner",
+    "time_estimate": "20-45 minutes",
+    "tools": [
+        "Phillips head screwdriver",
+        "Anti-static wrist strap",
+        "Compressed air canister",
+        "Cable management ties"
+    ],
+    "steps": [
+        "Shutdown computer properly and unplug power cord",
+        "Wait 30 seconds for internal components to discharge",
+        "Remove thumb screws or side panel screws",
+        "Slide or swing open side panel to access internals",
+        "Ground yourself with anti-static wrist strap",
+        "Locate component that needs service or replacement",
+        "Disconnect power and data cables from target component",
+        "Remove any mounting brackets or screws",
+        "Carefully extract component from bay or slot",
+        "Insert replacement component ensuring proper connection",
+        "Secure component with mounting screws or brackets",
+        "Reconnect all necessary power and data cables",
+        "Close side panel and secure with screws",
+        "Reconnect power cord and test system operation"
+    ],
+    "warnings": [
+        "Business computers may have warranty seals - check before opening",
+        "Use anti-static protection to prevent component damage",
+        "Some components may require specific HP-certified parts",
+        "Document cable connections before disconnection",
+        "Hard drives contain sensitive data - handle with care",
+        "Ensure adequate ventilation after component changes",
+        "Test system thoroughly after any modifications"
+    ]
+}

@@ -28,3 +28,54 @@ START HTML OUTPUT NOW:
     <p>Unfasten the four pentalobe screws along the edges. Use a suction cup to break the magnetic seal, then slide the bottom case toward the trackpad to release the four retaining prongs and lift it off.</p>
 </li>
 <li>
+
+
+
+
+
+
+
+
+
+""" 
+    try:
+        r = requests.post(OLLAMA_URL, json=payload, timeout=1200)
+        r.raise_for_status()
+
+        response = r.json() 
+        manual_text = response.get("response", "")
+
+        print("-" * 50)
+        print("DEBUG: Output Grezzo LLM (manual_text):")
+        print(manual_text)
+        print("-" * 50)
+
+        if not manual_text or manual_text.strip() == "":
+            print("DEBUG FALLITO: report_llm ha restituito output vuoto.")
+            return None  
+        
+        html_output = manual_text.strip()
+        text_lines = html_output.split('\n')
+        start_line_index = -1
+
+        for i, line in enumerate(text_lines):
+            line_stripped = line.strip()
+            if re.match(r'^\d+\.', line_stripped):
+                start_line_index = i
+                break
+            if re.match(r'^\*\*[^:]+\*\*', line_stripped):
+                start_line_index = i
+                break
+
+        if start_line_index != -1:
+            cleaned_manual_text = '\n'.join(text_lines[start_line_index:])
+            print("DEBUG SUCCESSO: Markdown strutturato isolato.")
+        else:
+            cleaned_manual_text = manual_text.strip()
+            print("DEBUG ATTENZIONE: Nessuna struttura Markdown trovata. Usando l'output completo.")
+            
+        return cleaned_manual_text
+
+    except requests.exceptions.RequestException as e:
+        print(f"Network error during Ollama call: {e}")
+        return None """

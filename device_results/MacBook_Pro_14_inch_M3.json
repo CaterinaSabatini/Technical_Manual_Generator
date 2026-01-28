@@ -1,0 +1,38 @@
+{
+    "device_name": "MacBook Pro 14-inch M3",
+    "category": "laptop",
+    "manufacturer": "Apple",
+    "difficulty": "Advanced",
+    "time_estimate": "60-90 minutes",
+    "tools": [
+        "P5 Pentalobe screwdriver",
+        "T3 Torx screwdriver", 
+        "Spudger",
+        "Anti-static wrist strap",
+        "Plastic prying tools"
+    ],
+    "steps": [
+        "Shut down MacBook completely and disconnect all cables",
+        "Remove 6 P5 pentalobe screws from bottom case",
+        "Use spudger to carefully lift bottom case from rear edge",
+        "Disconnect battery connector immediately for safety",
+        "Ground yourself with anti-static wrist strap throughout procedure",
+        "Identify component requiring repair or replacement",
+        "Remove necessary screws and disconnect relevant connectors",
+        "Install replacement component following proper orientation",
+        "Reconnect all cables and connectors securely",
+        "Reconnect battery connector as final internal step",
+        "Replace bottom case ensuring proper alignment",
+        "Reinstall all 6 pentalobe screws with proper torque",
+        "Power on and verify all functionality works correctly"
+    ],
+    "warnings": [
+        "MANDATORY: Wear anti-static wrist strap throughout entire procedure",
+        "Battery must be disconnected before performing any internal work",
+        "Internal components are extremely sensitive to electrostatic discharge",
+        "Use only Apple-certified replacement parts to maintain warranty",
+        "Improper assembly may void warranty and cause permanent damage",
+        "Never force connectors - they should connect smoothly",
+        "Keep workspace clean and organized to prevent component loss"
+    ]
+}
