@@ -49,8 +49,7 @@ def manual_generation_api():
         
         manual_id = report_llm(subtitles_data, device) 
 
-        # report_llm può ritornare una tupla ("error", None) in caso di errore
-        if not manual_id or (isinstance(manual_id, tuple) and manual_id[0] == "error"):
+        if not manual_id:
             return jsonify({
                 'success': False,
                 'status': 'error',

@@ -1,0 +1,39 @@
+{
+    "device_name": "Dell XPS 15 9530",
+    "category": "laptop",
+    "manufacturer": "Dell",
+    "difficulty": "Intermediate",
+    "time_estimate": "45-75 minutes",
+    "tools": [
+        "Phillips #0 screwdriver",
+        "Phillips #1 screwdriver",
+        "Plastic prying tools",
+        "Anti-static wrist strap",
+        "Spudger"
+    ],
+    "steps": [
+        "Power off laptop completely and unplug power adapter",
+        "Remove battery if externally accessible",
+        "Remove all screws from bottom panel using Phillips screwdrivers",
+        "Use plastic prying tools to carefully separate bottom panel",
+        "Disconnect internal battery connector for safety",
+        "Ground yourself with anti-static wrist strap",
+        "Locate target component for repair or replacement",
+        "Disconnect any cables connected to the component",
+        "Remove mounting screws securing the component",
+        "Install new component ensuring proper seating",
+        "Reconnect all cables and secure with screws",
+        "Reconnect internal battery",
+        "Replace bottom panel and all screws",
+        "Power on and test all functions"
+    ],
+    "warnings": [
+        "Always disconnect battery before working on internal components",
+        "Use anti-static protection to prevent component damage",
+        "Handle RAM and storage devices with extreme care",
+        "Ensure replacement parts are compatible with exact model",
+        "Overtightening screws can damage plastic mounting points",
+        "Keep track of screw locations as they vary in length",
+        "Check warranty status before opening device"
+    ]
+}
