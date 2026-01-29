@@ -37,7 +37,15 @@ def report_llm(data, device_name):
     max_chars: int = 20000
 
     all_subs = []
+    video_channels = []
+    video_urls = []
+    
     for video in data:
+        if "channel" in video and video["channel"] not in video_channels:
+            video_channels.append(video["channel"])
+        if "url" in video and video["url"] not in video_urls:
+            video_urls.append(video["url"])
+            
         for sub in video.get("subtitles_data", []):
             all_subs.append(sub["s"])
 
@@ -85,7 +93,9 @@ def report_llm(data, device_name):
         manual_json = {
             "device": device_name,
             "manual_text": manual_text,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "channels": video_channels,
+            "urls": video_urls
         }
 
         with open(file_path, "w", encoding="utf-8") as f:
