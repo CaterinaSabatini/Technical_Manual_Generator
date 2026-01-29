@@ -104,11 +104,21 @@ def show_manual(manual_id):
     with open(json_path, encoding="utf-8") as f:
         data = json.load(f)
 
+    video_sources = []
+    channels = data.get("channels", [])
+    urls = data.get("urls", [])
+
+    for i in range(max(len(channels), len(urls))):
+        channel = channels[i] if i < len(channels) else "Unknown Channel"
+        url = urls[i] if i < len(urls) else "#"
+        video_sources.append({"channel": channel, "url": url})
+
     return render_template(
         "manual.html",
         device_name=data["device"],
         manual_content=data["manual_text"],
-        timestamp=data["timestamp"]
+        timestamp=data["timestamp"],
+        video_sources=video_sources
     )
 
 
