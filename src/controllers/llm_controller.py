@@ -1,14 +1,6 @@
-import requests, os
+import requests
 import subprocess
 import time
-from dotenv import load_dotenv
-from requests.exceptions import ConnectionError, HTTPError
-
-load_dotenv()
-
-OLLAMA_PATH = os.getenv('OLLAMA_PATH')
-OLLAMA_TEST = os.getenv('OLLAMA_TEST')
-MAX_RETRIES = int(os.getenv('MAX_RETRIES'))
 
 """
 Starts and manages the Ollama process.
