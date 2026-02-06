@@ -99,8 +99,6 @@ To run a local copy of the application, follow the steps below.
 Ensure the following tools are installed on your computer:
 
 - **Python 3.12**: you can install Python by following this [link](https://www.python.org/downloads/)
-- **Ollama**: you can install Ollama by folllowing this ([link](https://ollama.com))
-- **Ollama Model**: `llama3.2:latest` pulled and available
 - **SQLite**: pre-installed with Python
 - **Internet Connection**: required for YouTube video access
 
