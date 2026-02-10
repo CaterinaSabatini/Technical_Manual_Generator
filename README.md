@@ -261,7 +261,7 @@ Once the server is running, open your browser and navigate to `http://localhost:
 
 **Device Not Found in Database**
 - Database is case-insensitive but requires 4+ characters and 3+ words
-- Try more specific model names (e.g., *Acer Aspire 1 15  A115-32" vs *Acer Aspire 1*)
+- Try more specific model names (e.g., *Acer Aspire 1 15  A115-32* vs *Acer Aspire 1*)
 - Check database exists at `src/devices_database/device.sqlite`
 
 > 💡 **NOTE**: Subtitle results depend on YouTube content. For some models, subtitles cannot be generated if there are no available videos.
