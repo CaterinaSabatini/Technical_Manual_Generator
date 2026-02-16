@@ -20,18 +20,19 @@
             </div>
         </header>
         <main class="main-content">
-            <section id="resultsSection" class="results-section">
+		{% for video in videos %}
+            <section class="results-section">
                 <div class="manual-container" id="manualContainer">
                     <h2 class="manual-title">Disassembly manual</h2>
                     <div class="manual-content-body">
-                    {{ manual_content|safe }}
+                    {{ video["manual_content"] }}
                 </div>
                 
                 {% if video_sources %}
                 <div class="video-sources-section">
                     <h3>Video Sources</h3>
                     <ul class="video-sources-list">
-                        {% for source in video_sources %}
+                        {% for source in video["video_sources"] %}
                         <li class="video-source-item">
                             <strong>{{ source.channel }}</strong> - 
                             <a href="{{ source.url }}" target="_blank">{{ source.url }}</a>
@@ -42,10 +43,11 @@
                 {% endif %}
                 
                 <div class="generated-time">
-                    Generated on {{ timestamp }} by TechGuide
+                    Generated on {{ video["timestamp"] }} by TechGuide
                 </div>
                 </div>
             </section>
+	    {% endfor %}
         </main>
     </div>
 </body>
