@@ -1,11 +1,7 @@
-You must convert the following subtitle transcription into a structured disassembly procedure.
+You must convert the following subtitle transcription into a summary, keeping where possible useful technical details, especially concerning safety.
 
 Output requirements:
 - Plain text only.
-- Numbered steps starting from 1.
-- Each step must contain:
-  - Action (imperative form)
-  - Technical description of how the action is performed
 
 Restrictions:
 - No HTML, Markdown, or formatting syntax.

@@ -93,6 +93,7 @@ def get_subtitles(research):
     mapped_models = map_device_to_models(research)
 
     if not mapped_models:
+        print('no models')
         return "error", None
         
 
@@ -132,18 +133,20 @@ def get_subtitles(research):
             else:
                 chosen_videos.append(entry)
             
-            if len(chosen_videos) == 0:
-                return "error", None
+        if len(chosen_videos) == 0:
+            print('no chosen')
+            return "error", None
 
         
         llm_context_models = ' | '.join(mapped_models)
-        chosen_videos = filter_llm(chosen_videos, MAX_VIDEOS, llm_context_models)
+        chosen_videos = filter_llm(chosen_videos, llm_context_models)
         print("-------------------")
         print('\n'.join([x['title'] for x in chosen_videos]))
 
         for entry in chosen_videos:
             video_id = entry["id"]
             title = entry["title"]
+            print(title)
             url = entry["webpage_url"]
             description = entry.get("description", "")
 
@@ -182,6 +185,7 @@ def get_subtitles(research):
             
             results = complete
 
+            print(video_id)
             valid_videos.append({
                 "video_id": video_id,
                 "title": title,
@@ -195,6 +199,7 @@ def get_subtitles(research):
             })
 
         if valid_videos is None or len(valid_videos) == 0:
+            print('no valid')
             return "error", None
             
         output_dir = "subtitles"

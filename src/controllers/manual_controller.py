@@ -34,28 +34,25 @@ Generate device manual using LLM based on subtitles data.
 """
 def report_llm(data, device_name):
 
-    max_chars: int = 20000
 
     all_subs = []
     video_channels = []
     video_urls = []
+
+    video = data
     
-    for video in data:
-        if "channel" in video and video["channel"] not in video_channels:
-            video_channels.append(video["channel"])
-        if "url" in video and video["url"] not in video_urls:
-            video_urls.append(video["url"])
-            
-        for sub in video.get("subtitles_data", []):
-            all_subs.append(sub["s"])
+    if "channel" in video and video["channel"] not in video_channels:
+        video_channels.append(video["channel"])
+    if "url" in video and video["url"] not in video_urls:
+        video_urls.append(video["url"])
+        
+    for sub in video.get("subtitles_data", []):
+        all_subs.append(sub["s"])
 
     subtitles_text = "\n".join(all_subs)
  
-    if len(subtitles_text) > max_chars:
-        subtitles_text = subtitles_text[:max_chars]
 
     prompt = f"""{FILTER_PROMPT_TEMPLATE} {subtitles_text}"""
-    prompt = ' '.join(prompt.split(' ')[:3000])
 
 
     payload = {
@@ -79,7 +76,7 @@ def report_llm(data, device_name):
             return "error", None
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        manuals_dir = os.path.join(base_dir, '..', 'device_manuals')
+        manuals_dir = os.path.join(base_dir, '..', 'video_reports')
 
         if not os.path.exists(manuals_dir):
             os.makedirs(manuals_dir)

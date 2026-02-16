@@ -1,6 +1,6 @@
 import os
 import atexit
-from flask import Flask
+from flask import Flask, request
 from dotenv import load_dotenv
 from controllers.home_controller import home_controller, manual_generation_api, show_manual
 from controllers.llm_controller import start_ollama, stop_ollama
@@ -28,14 +28,15 @@ def index():
     return home_controller()
 
 # API route for manual generation
-@app.route('/api/manual-generation', methods=['POST'])
+@app.route('/api/video_search', methods=['POST'])
 def manual_generation():
     return manual_generation_api()
 
 # Route to display generated manual
-@app.route('/api/manual/<manual_id>')
-def display_manual(manual_id):
-    return show_manual(manual_id)
+@app.route('/api/manual')
+def display_manual():
+    id_list = request.args.get('id').split(';')
+    return show_manual(id_list)
 
 if __name__ == '__main__':
     app.run(host=os.getenv('FLASK_HOST'), port=os.getenv('FLASK_PORT'), debug=os.getenv('FLASK_DEBUG'))
