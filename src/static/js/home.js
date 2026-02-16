@@ -120,7 +120,7 @@ class TechGuideApp {
     this.showLoading();
 
     try {
-      const response = await fetch('/api/manual-generation', {
+      const response = await fetch('/api/video_search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -136,7 +136,8 @@ class TechGuideApp {
       } 
 
       if (data.success && data.manual_id) {
-        const manualUrl = `/api/manual/${encodeURIComponent(data.manual_id.split('/').pop())}`;
+	const parameter = encodeURIComponent(data.manual_id.join(";"))
+	const manualUrl = `/api/manual?id=${parameter}`;
         
         try {
           const checkResponse = await fetch(manualUrl, { method: 'HEAD' });
