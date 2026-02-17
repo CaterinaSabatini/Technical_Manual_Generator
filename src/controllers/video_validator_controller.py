@@ -100,7 +100,7 @@ def filter_llm(videos, model):
     ret = []
     print(resp)
     chosen_ids = list(resp.items())
-    chosen_ids.sort(key=lambda x: x[1])
+    chosen_ids.sort(key=lambda x: x[1],reverse=True)
     print(chosen_ids)
     if isinstance(chosen_ids, list):
         for i in chosen_ids:

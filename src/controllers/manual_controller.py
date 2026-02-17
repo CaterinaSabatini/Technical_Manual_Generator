@@ -88,6 +88,7 @@ def report_llm(data, device_name):
         file_path = os.path.join(manuals_dir, file_name)
 
         manual_json = {
+            "title": video["title"],
             "device": device_name,
             "manual_text": manual_text,
             "timestamp": timestamp,
