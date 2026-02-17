@@ -23,7 +23,7 @@ VIDEO_LIST_PLACEHOLDER
 ---- END VIDEOS ----
 
 Output Format:
-You must only return a single JSON object containing the IDs of the chosen videos with the corresponding score.
+You must only return a single JSON object containing the IDs of every video with the corresponding score.
 
 
 {
