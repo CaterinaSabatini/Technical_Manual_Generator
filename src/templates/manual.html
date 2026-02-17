@@ -5,9 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechGuide - Technical Manual Generator</title>
+    <title>TechGuide - Technical Search Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/home.js') }}" defer></script>
 </head>
 <body>
@@ -16,19 +15,19 @@
             <div class="header-content">
                 <button id="homeBtn" class="home-btn" onclick="window.location.href='/'">Home</button>
                 <h1 class="logo">TechGuide</h1>
-                <p class="subtitle">Technical Manual Generator</p>
+                <p class="subtitle">Technical Search Assistant</p>
             </div>
         </header>
         <main class="main-content">
 		{% for video in videos %}
             <section class="results-section">
                 <div class="manual-container" id="manualContainer">
-                    <h2 class="manual-title">Disassembly manual</h2>
+			<h2 class="manual-title">{{ video["title"] }}</h2>
                     <div class="manual-content-body">
                     {{ video["manual_content"] }}
                 </div>
                 
-                {% if video_sources %}
+                {% if video %}
                 <div class="video-sources-section">
                     <h3>Video Sources</h3>
                     <ul class="video-sources-list">

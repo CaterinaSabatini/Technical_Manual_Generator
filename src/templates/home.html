@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechGuide - Technical Manual Generator</title>
+    <title>TechGuide - Technical Search Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/home.js') }}" defer></script>
 </head>
@@ -15,7 +15,7 @@
             <div class="header-content">
                 <button id="homeBtn" class="home-btn hidden">Home</button>
                 <h1 class="logo">TechGuide</h1>
-                <p class="subtitle">Technical Manual Generator</p>
+                <p class="subtitle">Technical Search Assistant</p>
             </div>
         </header>
 
@@ -39,14 +39,14 @@
             <section id="loadingSection" class="loading-section hidden">
                 <div class="loading-container">
                     <div class="spinner"></div>
-                    <p class="loading-text">Searching for manual...</p>
+                    <p class="loading-text">Searching for videos...</p>
                 </div>
             </section>
 
             <section id="errorSection" class="error-section hidden">
                 <div class="error-container">
-                    <h3>Manual Not Found</h3>
-                    <p id="errorMessage">An error occurred while searching for the manual.</p>
+                    <h3>Search Not Successful</h3>
+                    <p id="errorMessage">An error occurred while searching for the videos.</p>
                     <div class="error-actions">
                         <button id="goBackBtn" class="go-back-btn">Go Back to Search</button>
                     </div>

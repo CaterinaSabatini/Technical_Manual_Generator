@@ -120,7 +120,8 @@ def show_manual(manual_id_list):
             "device_name": data["device"],
             "manual_content": data["manual_text"],
             "video_sources": video_sources,
-            "timestamp": data["timestamp"]
+            "timestamp": data["timestamp"],
+            "title": data["title"]
             })
 
     return render_template(
