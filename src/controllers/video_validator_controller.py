@@ -13,7 +13,6 @@ PROMPT_TEMPLATE_SUBTITLES_PATH = os.getenv('PROMPT_SUBTITLES')
 
 #Validation parameters
 MIN_DURATION = int(os.getenv('MIN_DURATION')) 
-MAX_DURATION = int(os.getenv('MAX_DURATION'))
 
 
 if not PROMPT_TEMPLATE_SUBTITLES_PATH:
@@ -106,6 +105,7 @@ def filter_llm(videos, model):
         for i in chosen_ids:
             for e in videos:
                 if e['id'] == i[0]:
+                    e['score'] = i[1]
                     ret.append(e)
                 
     return ret
