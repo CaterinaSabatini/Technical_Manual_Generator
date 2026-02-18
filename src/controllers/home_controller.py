@@ -121,7 +121,8 @@ def show_manual(manual_id_list):
             "manual_content": data["manual_text"],
             "video_sources": video_sources,
             "timestamp": data["timestamp"],
-            "title": data["title"]
+            "title": data["title"],
+            "score": data["score"]
             })
 
     return render_template(

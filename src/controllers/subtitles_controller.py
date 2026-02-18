@@ -11,7 +11,6 @@ from .video_validator_controller import is_valid_video, filter_llm
 
 load_dotenv()
 
-MAX_VIDEOS = int(os.getenv('MAX_VIDEOS'))
 MAX_SEARCH = int(os.getenv('MAX_SEARCH'))
 OLLAMA_URL = os.getenv('OLLAMA_URL')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
@@ -195,7 +194,8 @@ def get_subtitles(research):
                 "views": views,
                 "url": url,
                 "subtitles_data": results, 
-                "copyright_note": f"'{title}' by {channel} on YouTube."
+                "copyright_note": f"'{title}' by {channel} on YouTube.",
+                "score": entry["score"]
             })
 
         if valid_videos is None or len(valid_videos) == 0:
