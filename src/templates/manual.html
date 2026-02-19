@@ -40,13 +40,12 @@
                     </ul>
                 </div>
                 {% endif %}
-                
+                <div class="video-sources-section">
+                    <h3>Score: {{ video["score"] }}</h3>
+                </div>
                 <div class="generated-time">
                     Generated on {{ video["timestamp"] }} by TechGuide
                 </div>
-		<div class="score">
-			Score: {{ video["score"] }}
-		</div>
                 </div>
             </section>
 	    {% endfor %}

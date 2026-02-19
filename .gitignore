@@ -36,5 +36,7 @@ src/manuals/
 # Device manuals directory
 src/device_manuals/
 
+# Video reports directory
+video_reports/
 
 
