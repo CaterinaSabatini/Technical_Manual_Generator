@@ -99,13 +99,11 @@ def filter_llm(videos, model):
     ret = []
     print(resp)
     chosen_ids = list(resp.items())
-    chosen_ids.sort(key=lambda x: x[1],reverse=True)
     print(chosen_ids)
     if isinstance(chosen_ids, list):
-        for i in chosen_ids:
-            for e in videos:
-                if e['id'] == i[0]:
-                    e['score'] = i[1]
-                    ret.append(e)
+        for e in videos:
+            if e['id'] in resp:
+                e['llm_score'] = resp[e['id']]
+                ret.append(e)
                 
     return ret
