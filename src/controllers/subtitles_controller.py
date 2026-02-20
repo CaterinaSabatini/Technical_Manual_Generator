@@ -14,6 +14,8 @@ load_dotenv()
 MAX_SEARCH = int(os.getenv('MAX_SEARCH'))
 OLLAMA_URL = os.getenv('OLLAMA_URL')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
+COEF_VIEW = float(os.getenv('COEF_VIEW'))
+COEF_LIKE = float(os.getenv('COEF_LIKE'))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, '..', 'devices_database', 'device.sqlite')
@@ -146,6 +148,14 @@ def get_subtitles(research):
             video_id = entry["id"]
             title = entry["title"]
             print(title)
+            print(list(entry.keys()))
+            time_uploaded = datetime.datetime.fromtimestamp(entry['timestamp'])
+            time_since = datetime.datetime.now() - time_uploaded
+            print(time_uploaded, time_since)
+            view_score = entry['view_count']*COEF_VIEW/time_since.days
+            like_score = entry['like_count']*COEF_LIKE/entry['view_count']
+
+            entry["score"] = float(entry["llm_score"])+view_score+like_score
             url = entry["webpage_url"]
             description = entry.get("description", "")
 
@@ -202,6 +212,7 @@ def get_subtitles(research):
             print('no valid')
             return "error", None
             
+        valid_videos.sort(key=lambda x: x["score"], reverse=True)
         output_dir = "subtitles"
         os.makedirs(output_dir, exist_ok=True)
 
