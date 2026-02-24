@@ -5,6 +5,9 @@ import datetime
 from .subtitles_controller import get_subtitles
 from .manual_controller import report_llm
 
+COEF_VIEW = float(os.getenv('COEF_VIEW'))
+COEF_LIKE = float(os.getenv('COEF_LIKE'))
+
 """
 Home controller to render the home page.
 @return HTML template for home page.
@@ -54,7 +57,13 @@ def manual_generation_api():
                 'error': 'No subtitles found for the specified device. Try with a more specific model name'
             }), 404
         
-        report_ids = [report_llm(video, device) for video in subtitles_data]
+        report_ids = []
+        for video in subtitles_data:
+            start_time = datetime.datetime.now()
+            nuovo_id = report_llm(video, device)
+            end_time = datetime.datetime.now()
+            report_ids.append(nuovo_id)
+            print(len(report_ids),nuovo_id, f"time: {end_time-start_time}")
 
         for report_id in report_ids:
             if not report_id or (isinstance(report_id, tuple) and report_id[0] == "error"):
@@ -95,6 +104,8 @@ Render the manual page based on manual ID.
 """
 def show_manual(manual_id_list):
 
+    max_view = 0
+    max_like = 0
     videos = []
     for manual_id in manual_id_list:
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -116,14 +127,28 @@ def show_manual(manual_id_list):
             url = urls[i] if i < len(urls) else "#"
             video_sources.append({"channel": channel, "url": url})
 
+        vs = data["view_score"]
+        ls = data["like_score"]
         videos.append({
             "device_name": data["device"],
             "manual_content": data["manual_text"],
             "video_sources": video_sources,
             "timestamp": data["timestamp"],
             "title": data["title"],
-            "score": data["score"]
+            "view_score": vs,
+            "like_score": ls
             })
+        if vs > max_view:
+            max_view = vs
+        if ls > max_like:
+            max_like = ls
+
+    for i in range(len(videos)):
+        videos[i]["view_score"] /= max_view
+        videos[i]["like_score"] /= max_like
+        videos[i]["score"] = (videos[i]["view_score"]*COEF_VIEW + videos[i]["like_score"]*COEF_LIKE)*100/(COEF_VIEW+COEF_LIKE)
+
+    videos.sort(key=lambda x: x["score"], reverse=True)
 
     return render_template(
         "manual.html",
