@@ -6,7 +6,7 @@ import tempfile
 import sqlite3
 import datetime
 from dotenv import load_dotenv
-from .video_validator_controller import is_valid_video, filter_llm
+from .video_validator_controller import is_valid_video
 
 
 load_dotenv()
@@ -140,7 +140,6 @@ def get_subtitles(research):
 
         
         llm_context_models = ' | '.join(mapped_models)
-        chosen_videos = filter_llm(chosen_videos, llm_context_models)
         print("-------------------")
         print('\n'.join([x['title'] for x in chosen_videos]))
 
@@ -152,10 +151,11 @@ def get_subtitles(research):
             time_uploaded = datetime.datetime.fromtimestamp(entry['timestamp'])
             time_since = datetime.datetime.now() - time_uploaded
             print(time_uploaded, time_since)
-            view_score = entry['view_count']*COEF_VIEW/time_since.days
-            like_score = entry['like_count']*COEF_LIKE/entry['view_count']
+            view_score = entry['view_count']/time_since.days
+            like_score = entry['like_count']/entry['view_count']
 
-            entry["score"] = float(entry["llm_score"])+view_score+like_score
+            entry["view_score"] = view_score
+            entry["like_score"] = like_score
             url = entry["webpage_url"]
             description = entry.get("description", "")
 
@@ -205,14 +205,14 @@ def get_subtitles(research):
                 "url": url,
                 "subtitles_data": results, 
                 "copyright_note": f"'{title}' by {channel} on YouTube.",
-                "score": entry["score"]
+                "view_score": entry["view_score"],
+                "like_score": entry["like_score"]
             })
 
         if valid_videos is None or len(valid_videos) == 0:
             print('no valid')
             return "error", None
             
-        valid_videos.sort(key=lambda x: x["score"], reverse=True)
         output_dir = "subtitles"
         os.makedirs(output_dir, exist_ok=True)
 
