@@ -48,62 +48,62 @@ Filter videos using LLM to select the most relevant ones
 @param model: device model name
 @return: list of selected video metadata dictionaries
 """
-def filter_llm(videos, model):
-    
-
-    l_video = '\n'.join(['; '.join((r['id'],r['title'])) for r in videos]) + '\n'
-
-    prompt = (
-        FILTER_PROMPT_TEMPLATE
-        .replace("CONTEXT_MODELS_PLACEHOLDER", model)
-        .replace("VIDEO_LIST_PLACEHOLDER", l_video)
-    )
-
-
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": prompt,
-        "options": {
-            "temperature": 100.0,
-            "seed": 1,
-            "top_k": 10,
-            "top_p": 0.1,
-            "min_p": 0,
-            "repeat_penalty": 1.15,
-            "mirostat": 0
-        },
-        "format": "json",
-        "stream": False,
-        "stop": ["```", "\n```", "\n\n\n"] 
-    }
-    print(prompt)
-    
-
-    try:
-        r = requests.post(OLLAMA_URL, json=payload, timeout=120)
-        r.raise_for_status() 
-        
-        raw = r.json().get("response", "")
-        m = re.search(r'\{.*\}', raw, re.DOTALL)
-        
-        if not m:
-            return []
-        
-        resp = json.loads(m.group(0))
-        
-    except requests.exceptions.RequestException:
-        return []
-    except json.JSONDecodeError:
-        return []
-    
-    ret = []
-    print(resp)
-    chosen_ids = list(resp.items())
-    print(chosen_ids)
-    if isinstance(chosen_ids, list):
-        for e in videos:
-            if e['id'] in resp:
-                e['llm_score'] = resp[e['id']]
-                ret.append(e)
-                
-    return ret
+#def filter_llm(videos, model):
+#    
+#
+#    l_video = '\n'.join(['; '.join((r['id'],r['title'])) for r in videos]) + '\n'
+#
+#    prompt = (
+#        FILTER_PROMPT_TEMPLATE
+#        .replace("CONTEXT_MODELS_PLACEHOLDER", model)
+#        .replace("VIDEO_LIST_PLACEHOLDER", l_video)
+#    )
+#
+#
+#    payload = {
+#        "model": OLLAMA_MODEL,
+#        "prompt": prompt,
+#        "options": {
+#            "temperature": 100.0,
+#            "seed": 1,
+#            "top_k": 10,
+#            "top_p": 0.1,
+#            "min_p": 0,
+#            "repeat_penalty": 1.15,
+#            "mirostat": 0
+#        },
+#        "format": "json",
+#        "stream": False,
+#        "stop": ["```", "\n```", "\n\n\n"] 
+#    }
+#    print(prompt)
+#    
+#
+#    try:
+#        r = requests.post(OLLAMA_URL, json=payload, timeout=120)
+#        r.raise_for_status() 
+#        
+#        raw = r.json().get("response", "")
+#        m = re.search(r'\{.*\}', raw, re.DOTALL)
+#        
+#        if not m:
+#            return []
+#        
+#        resp = json.loads(m.group(0))
+#        
+#    except requests.exceptions.RequestException:
+#        return []
+#    except json.JSONDecodeError:
+#        return []
+#    
+#    ret = []
+#    print(resp)
+#    chosen_ids = list(resp.items())
+#    print(chosen_ids)
+#    if isinstance(chosen_ids, list):
+#        for e in videos:
+#            if e['id'] in resp:
+#                e['llm_score'] = resp[e['id']]
+#                ret.append(e)
+#                
+#    return ret

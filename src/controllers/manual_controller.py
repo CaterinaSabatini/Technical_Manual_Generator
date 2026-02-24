@@ -94,7 +94,8 @@ def report_llm(data, device_name):
             "timestamp": timestamp,
             "channels": video_channels,
             "urls": video_urls,
-            "score": video["score"]
+            "view_score": video["view_score"],
+            "like_score": video["like_score"]
         }
 
         with open(file_path, "w", encoding="utf-8") as f:
