@@ -205,8 +205,8 @@ def get_subtitles(research):
                 "url": url,
                 "subtitles_data": results, 
                 "copyright_note": f"'{title}' by {channel} on YouTube.",
-                "view_score": entry["view_score"],
-                "like_score": entry["like_score"]
+                "view_score": entry["view_score"], # view_score e like_score tenuti separati nei dati del video
+                "like_score": entry["like_score"]  # vengono combinati al momento della visualizzazione
             })
 
         if valid_videos is None or len(valid_videos) == 0:
