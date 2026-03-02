@@ -144,6 +144,8 @@ def show_manual(manual_id_list):
             max_like = ls
 
     for i in range(len(videos)):
+        # il punteggio dei video viene calcolato al volo prima della visualizzazione
+        # in modo da poter cambiare i pesi senza riscaricare i video
         videos[i]["view_score"] /= max_view
         videos[i]["like_score"] /= max_like
         videos[i]["score"] = (videos[i]["view_score"]*COEF_VIEW + videos[i]["like_score"]*COEF_LIKE)*100/(COEF_VIEW+COEF_LIKE)

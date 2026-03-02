@@ -62,9 +62,7 @@ def report_llm(data, device_name):
         "options": {
             "num_ctx": 4096,
             "temperature": 0.2
-        },
-        "stop": ["```", "\n```", "\n\n\n"] 
-    }
+        }, "stop": ["```", "\n```", "\n\n\n"] }
 
     try:
         r = requests.post(OLLAMA_URL, json=payload, timeout=1200)
@@ -87,6 +85,9 @@ def report_llm(data, device_name):
         file_name = f"{safe_device_name}_{timestamp}.json"
         file_path = os.path.join(manuals_dir, file_name)
 
+        print(video["title"])
+        print(manual_text)
+
         manual_json = {
             "title": video["title"],
             "device": device_name,
@@ -94,8 +95,8 @@ def report_llm(data, device_name):
             "timestamp": timestamp,
             "channels": video_channels,
             "urls": video_urls,
-            "view_score": video["view_score"],
-            "like_score": video["like_score"]
+            "view_score": video["view_score"], # gli score vanno salvati sul disco
+            "like_score": video["like_score"]  # per evitare di riscaricare i video al cambiamento dei pesi
         }
 
         with open(file_path, "w", encoding="utf-8") as f:
