@@ -151,8 +151,14 @@ def get_subtitles(research):
             time_uploaded = datetime.datetime.fromtimestamp(entry['timestamp'])
             time_since = datetime.datetime.now() - time_uploaded
             print(time_uploaded, time_since)
-            view_score = entry['view_count']/time_since.days
-            like_score = entry['like_count']/entry['view_count']
+            
+            # Gestisci valori None per evitare errori di divisione
+            view_count = entry.get('view_count') or 0
+            like_count = entry.get('like_count') or 0
+            
+            view_score = view_count / time_since.days if time_since.days > 0 else 0
+            like_score = like_count / view_count if view_count > 0 else 0
+
 
             entry["view_score"] = view_score
             entry["like_score"] = like_score
