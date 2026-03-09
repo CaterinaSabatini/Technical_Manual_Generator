@@ -17,26 +17,26 @@
 </div>
 
 ## 📖 Introduction 
-**Technical Manual Generator** is an intelligent system that automatically creates comprehensive disassembly manuals for laptops by analyzing YouTube teardown videos. The application searches for relevant videos, extracts and validates content, and uses Large Language Models (LLMs) to synthesize technical documentation.
+**Technical Assistant Generator** is an intelligent system that automatically generates concise and informative summaries of laptop teardown videos. The application searches for relevant videos, extracts and validates content, and leverages Large Language Models (LLMs) to produce technical summaries that highlight key steps and important hardware information.
 
 ### ✨ Main Features
 
 - **Automated Subtitle Extraction**: downloads and processes subtitles from YouTube teardown videos
 - **AI-Powered Content Validation**: uses LLM to analyze and select the most relevant content from multiple video sources
-- **Intelligent Manual Generation**: synthesizes technical disassembly manuals using Ollama LLMs
-- **Web Interface**: clean, responsive UI for easy device search and manual viewing
-- **Archive**: all video subtitles and generated manuals are saved in JSON format
+- **Intelligent Summary Generation**: synthesizes technical disassembly summary using Ollama LLMs
+- **Web Interface**: clean, responsive UI for easy device search and summary viewing
+- **Archive**: all video subtitles and generated reports are saved in JSON format
 
 ### 🔄 How It Works
 
 1. **User Input**: user enters a device name (e.g., "MacBook Pro 14")
 2. **Database Matching**: system matches the searched device with the database to find the correct subtitles.
 3. **Video Discovery**: searches YouTube for teardown videos for the searched device
-4. **Content Validation**: filters videos based on configurable criteria (views, duration, like ratio)
-5. **LLM Filtering**: uses AI to select the most relevant videos from candidates
+4. **Content Validation**: filters videos based on configurable criteria (minimum duration)
+5. **LLM Scoring**: uses AI to scoring the most relevant videos from candidates
 6. **Subtitle Processing**: extracts and cleans subtitles from chosen videos
-7. **Manual Synthesis**: LLM generates a structured technical manual from the subtitle content
-8. **Output**: returns a manual viewable in the browser
+7. **Manual Synthesis**: LLM generates a structured reports from the subtitle content
+8. **Output**: returns a summary viewable in the browser
 
 ### 🛠️ Technologies Used
 The application is developed using the following technologies:
@@ -63,19 +63,25 @@ Technical_Manual_Generator/
 │   ├── device_manuals/                 # Generated manuals (JSON)
 │   ├── devices_database/
 │   │   ├── device.sqlite               # Device model database
-│   │   └── modelli.sql                 # Database schema
+│   │   └── modelli.sqlite              # SQLite database file
 │   ├── static/
-│   │   ├── css/style.css               # Styling
-│   │   └── js/home.js                  # Frontend interactivity
-│   ├── subtitles/                      # Downloaded subtitle files
+│   │   ├── css/                        # CSS stylesheets
+│   │   └── js/                         # JavaScript files
+│   ├── subtitles/                      # Downloaded subtitle files (JSON)
 │   ├── templates/
 │   │   ├── home.html                   # Search page
 │   │   └── manual.html                 # Manual display page
-│   └── utils/
-│       ├── create_db.py                # Database creation utility
-│       ├── prompt_manual.txt           # LLM prompt for manual generation
-│       └── prompt_subtitles.txt        # LLM prompt for video selection
-├── .env                                # Environment configuration
+│   ├── utils/
+│   │   ├── create_db.py                # Database creation utility
+│   │   ├── update_db.py                # Database update utility
+│   │   ├── prompt_manual.txt           # LLM prompt for report generation
+│   │   ├── prompt_subtitles.txt        # LLM prompt for video selection
+│   │   ├── prompt_subtitles_no_filter.txt  # Alternative prompt (no filter)
+│   │   └── prompt_subtitles_no_filter2.txt # Alternative prompt v2 (no filter)
+│   └── video_reports/                  # Video analysis reports
+├── .env                                # Environment configuration (create from .env.example)
+├── .env.example                        # Environment configuration template
+├── .gitignore                          # Git ignore rules
 ├── requirements.txt                    # Python dependencies
 ├── README.md                           # This file
 └── LICENSE                             # License information
@@ -149,22 +155,27 @@ Ensure the following tools are installed on your computer:
    OLLAMA_URL=http://localhost:11434/api/generate
    OLLAMA_TEST=http://localhost:11434/api/tags
    OLLAMA_MODEL=llama3.2:latest
-   PROMPT_SUBTITLES=utils/prompt_subtitles.txt
+   MAX_RETRIES=2
+   RETRY_DELAY=2.0
+   REQUEST_TIMEOUT=2.0
+
+   # Prompt templates with filtering
+   #PROMPT_SUBTITLES=utils/prompt_subtitles.txt
+
+   # Alternative prompt templates without filtering
+   PROMPT_SUBTITLES=utils/prompt_subtitles_no_filter.txt
+
+   # Manual prompt templates
    PROMPT_MANUAL=utils/prompt_manual.txt
-   MAX_RETRIES=
-   RETRY_DELAY=
-   REQUEST_TIMEOUT=
 
    # Database configuration
    DB_PATH=devices_database/device.sqlite
 
    # Video analysis parameters
-   MAX_SEARCH=
-   MAX_VIDEOS=
-   MIN_VIEWS=
-   MIN_DURATION=        # seconds
-   MAX_DURATION=        # 1 hour
-   MIN_LIKE_RATIO=      # 70% likes vs total votes
+   MAX_SEARCH=20
+   MIN_DURATION=60       # seconds
+   COEF_VIEW=
+   COEF_LIKE=
    ```
 
    **Environment Variables Explanation:**
@@ -181,22 +192,24 @@ Ensure the following tools are installed on your computer:
    - `OLLAMA_URL`: API endpoint for Ollama text generation (default: `http://localhost:11434/api/generate`)
    - `OLLAMA_TEST`: API endpoint to verify Ollama connection (default: `http://localhost:11434/api/tags`)
    - `OLLAMA_MODEL`: name of the Ollama model to use (default: `llama3.2:latest`)
-   - `PROMPT_SUBTITLES`: relative path to the prompt template for video selection
-   - `PROMPT_MANUAL`: relative path to the prompt template for manual generation
-   - `MAX_RETRIES`: maximum connection attempts to Ollama before failing
-   - `RETRY_DELAY`: seconds to wait between connection retry attempts
-   - `REQUEST_TIMEOUT`: maximum seconds to wait for Ollama response
+   - `MAX_RETRIES`: maximum connection attempts to Ollama before failing (default: `2`)
+   - `RETRY_DELAY`: seconds to wait between connection retry attempts (default: `2.0`)
+   - `REQUEST_TIMEOUT`: maximum seconds to wait for Ollama response (default: `2.0`)
+
+   **Prompt Configuration:**
+   - `PROMPT_SUBTITLES`: relative path to the prompt template for video selection. Options:
+     - `utils/prompt_subtitles.txt` - standard prompt with filtering
+     - `utils/prompt_subtitles_no_filter.txt` - alternative prompt without filtering (recommended)
+   - `PROMPT_MANUAL`: relative path to the prompt template for reports generation (default: `utils/prompt_manual.txt`)
 
    **Database Configuration:**
    - `DB_PATH`: relative path to the SQLite database containing device models
 
    **Video Analysis Parameters:**
-   - `MAX_SEARCH`: maximum number of YouTube videos to search and evaluate
-   - `MAX_VIDEOS`: maximum number of videos to process for manual generation
-   - `MIN_VIEWS`: minimum view count required for a video to be considered
-   - `MIN_DURATION`: minimum video length in seconds (filters out too-short videos)
-   - `MAX_DURATION`: maximum video length in seconds (filters out too-long videos)
-   - `MIN_LIKE_RATIO`: minimum like-to-total-votes ratio (0.7 = 70% likes minimum) 
+   - `MAX_SEARCH`: maximum number of YouTube videos to search and evaluate (default: `20`)
+   - `MIN_DURATION`: minimum video length in seconds (default: `60` - filters out too-short videos)
+   - `COEF_VIEW`: coefficient for view count scoring in video selection
+   - `COEF_LIKE`: coefficient for like ratio scoring in video selection 
 
 
 5. **Set up the database**
@@ -227,14 +240,14 @@ Once the server is running, open your browser and navigate to `http://localhost:
 1. Enter a device name in the search box (e.g., *MacBook Pro 14*, *Dell Inspiron 15*)
 2. Click *Search*
 3. Wait for the process to complete 
-4. View the generated manual in your browser
+4. View the generated report in your browser
 
 
 ### API Endpoints
 
 - `GET /` - Home page with search interface
   
-- `POST /api/manual-generation` - Generate manual for a device
+- `POST /api/manual-generation` - Generate report for a device
   ```json
   Request Body:
   {
@@ -279,13 +292,13 @@ Once the server is running, open your browser and navigate to `http://localhost:
 
 **Manual Accuracy**
 
-The generated manuals may contain inaccuracies or incomplete information due to two main factors:
+The generated reports may contain inaccuracies or incomplete information due to two main factors:
 
-1. **YouTube Content Dependency**: The quality and accuracy of the manuals directly depend on the available YouTube video content. If teardown videos are incomplete, unclear, or incorrect, the generated manual will reflect these limitations.
+1. **YouTube Content Dependency**: The quality and accuracy of the summary directly depend on the available YouTube video content. If teardown videos are incomplete, unclear, or incorrect, the generated report will reflect these limitations.
 
 2. **Model Size Constraints**: This application uses the `llama3.2:latest` model with only **3 billion parameters**. While functional, smaller models have limited reasoning capabilities compared to larger alternatives (e.g., 7B, 13B, or 70B parameter models).
 
-> 💡 **Recommendation**: The choice of a 3B model was made to accommodate hardware constraints during development. For improved accuracy and more detailed manuals, we recommend using a larger Ollama model if your system has sufficient resources (RAM/GPU). You can switch models by updating the `OLLAMA_MODEL` variable in your `.env` file and pulling the desired model with `ollama pull <model_name>`.
+> 💡 **Recommendation**: The choice of a 3B model was made to accommodate hardware constraints during development. For improved accuracy and more detailed summary, we recommend using a larger Ollama model if your system has sufficient resources (RAM/GPU). You can switch models by updating the `OLLAMA_MODEL` variable in your `.env` file and pulling the desired model with `ollama pull <model_name>`.
 
 ---
 
