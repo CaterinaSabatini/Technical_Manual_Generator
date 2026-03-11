@@ -1,4 +1,4 @@
-<h1 align="center">Technical Manual Generator</h1>
+<h1 align="center">Technical Search Assistant</h1>
 
 
 <div align="center">
@@ -17,7 +17,7 @@
 </div>
 
 ## 📖 Introduction 
-**Technical Assistant Generator** is an intelligent system that automatically generates concise and informative summaries of laptop teardown videos. The application searches for relevant videos, extracts and validates content, and leverages Large Language Models (LLMs) to produce technical summaries that highlight key steps and important hardware information.
+**Technical Search Assistant** is an intelligent system that automatically generates concise and informative summaries of laptop teardown videos. The application searches for relevant videos, extracts and validates content, and leverages Large Language Models (LLMs) to produce technical summaries that highlight key steps and important hardware information.
 
 ### ✨ Main Features
 
